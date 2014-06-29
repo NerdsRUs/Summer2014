@@ -1,5 +1,19 @@
 
 ZZZ/Assets/Source/Common/Engine/EventSystem/EventManger.cs
-ZZZ/Library/
-ZZZ/obj/
-ZZZ/Temp/
+ZZZ/Library/*
+ZZZ/obj/*
+ZZZ/Temp/*
+
+ZZZ/Library/assetDatabase3
+
+ZZZ/Library/CurrentLayout.dwlt
+
+ZZZ/Library/guidmapper
+
+ZZZ/Library/assetDatabase3
+
+ZZZ/Library/ScriptMapper
+
+ZZZ/ZZZ-csharp.sln
+
+ZZZ/ZZZ.sln
