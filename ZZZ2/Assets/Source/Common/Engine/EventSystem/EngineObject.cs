@@ -131,13 +131,13 @@ public class EngineObject : MonoBehaviour
 		return mInstance;
 	}
 
-	public void AddEvent(EngineEvent.EventCall callEvent, bool executeInstantly = false)
+	public void AddEvent(string functionName, params object[] parameters)
 	{
 		EngineEvent newEvent = new EngineEvent();
 
-		newEvent.Init(callEvent, Time.time, transform.position);
+		newEvent.Init(functionName, Time.time, transform.position, parameters);
 
-		mInstance.MakeEvent(newEvent, executeInstantly);
+		mInstance.MakeEvent(newEvent);
 	}
 
 	virtual public bool executeCommand(string script)

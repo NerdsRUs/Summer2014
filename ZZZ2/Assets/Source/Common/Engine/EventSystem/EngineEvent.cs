@@ -4,35 +4,52 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 
-public class EngineEvent : MonoBehaviour
+public class EngineEvent
 {
-	public delegate void EventCall();
-
 	float mTime;
 	Vector3 mPosition;
-	EventCall mAction;
+	string mFunctionName;
+	object[] mParameters;
 
 	static bool mExecutingEvent;
 
-	public void Init(EventCall eventCall, float time, Vector3 position)
+	public void Init(string eventName, float time, Vector3 position, params object[] parameters)
 	{
 		mTime = time;
 		mPosition = position;
-		mAction = eventCall;
+		mFunctionName = eventName;
+		mParameters = parameters;
 	}
 
 	public void Execute(EventManager instance)
 	{
+		Debug.Log(mFunctionName);
+		MethodInfo tempMethod = typeof(EventAPI).GetMethod(mFunctionName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+
+		if (tempMethod == null)
+		{
+			Debug.LogError("Event function does not exist: '" + mFunctionName + "'");
+			return;
+		}
+
+		ParameterInfo[] tempInfo = tempMethod.GetParameters();
+
+		if (mParameters.Length != tempInfo.Length)
+		{
+			Debug.LogError("Event function parameter coutns don't match: '" + mFunctionName + "'" + tempInfo.Length + " got " + mParameters.Length);
+			return;
+		}
+
 		EventAPI.SetCurrentInstance(instance);
 		mExecutingEvent = true;
 
 		try
 		{
-			mAction();
+			tempMethod.Invoke(null, mParameters);
 		}
 		catch (Exception e)
 		{
-			Debug.LogError("Event had error: " + e.Message + "/n" + e.StackTrace);
+			Debug.LogError("Event had error: " + e.InnerException.Message + "/n" + e.InnerException.StackTrace);
 		}
 
 		mExecutingEvent = false;
@@ -40,12 +57,12 @@ public class EngineEvent : MonoBehaviour
 
 	public string getCommandString()
 	{
-		return mAction.Method.Name;
+		return mFunctionName;
 	}
 
 	public string getName()
 	{
-		return mTime.ToString("0.00") + ") " + mAction.Method.Name;
+		return mTime.ToString("0.00") + ") " + mFunctionName;
 	}
 
 	static public bool isExecutingEvent()

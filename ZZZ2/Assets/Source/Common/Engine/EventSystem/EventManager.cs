@@ -135,8 +135,6 @@ public class EventManager : EngineObject
 			return (T)(EngineObject)this;
 		}
 
-		Debug.Log(mGameObjects.Count);
-
 		if (mGameObjects.contains(objectID) && mGameObjects[objectID] is T)
 		{
 			return (T)mGameObjects[objectID];
@@ -150,26 +148,8 @@ public class EventManager : EngineObject
 		return mCurrentInstance;
 	}
 
-	public void AddEvent(EngineEvent.EventCall callEvent, bool executeInstantly = false)
+	public void MakeEvent(EngineEvent callEvent)
 	{
-		EngineEvent newEvent = new EngineEvent();
-
-		newEvent.Init(callEvent, Time.time, Vector3.zero);
-
-		MakeEvent(newEvent, executeInstantly);
-	}
-
-	public void MakeEvent(EngineEvent callEvent, bool executeInstantly)
-	{
-		if (executeInstantly)
-		{
-			//EventDebug.addEvent(callEvent);
-
-			callEvent.Execute(this);
-		}
-		else
-		{
-			mCurrentEvents.Add(callEvent);
-		}
+		mCurrentEvents.Add(callEvent);
 	}
 }
