@@ -1,15 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Pathing : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+public class Pathing : EngineObject 
+{
+	public void SetUserVelocity(Vector3 newVelocity)
+	{
+		rigidbody2D.velocity = newVelocity;
 	}
 }

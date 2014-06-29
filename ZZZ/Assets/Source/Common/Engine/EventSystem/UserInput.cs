@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class UserInput : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
-	
+public class UserInput : MonoBehaviour 
+{
+	void Start () 
+	{
+		UICamera.fallThrough = gameObject;
 	}
 	
 	// Update is called once per frame

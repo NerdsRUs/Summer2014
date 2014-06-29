@@ -1,10 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EventAPI {
-	
+public class EventAPI 
+{
+	static EventManager mCurrentInstance;
+
+	static public void SetCurrentInstance(EventManager instance)
+	{
+		mCurrentInstance = instance;
+	}
+
 	static void SetUserVelocity(int objectID, Vector3 newVelocity)
 	{
-		EventManger.GetObject<Pathing>(objectID).SetUserVelocity(newVelocity);
+		mCurrentInstance.GetObject<Pathing>(objectID).SetUserVelocity(newVelocity);
 	}
 }
