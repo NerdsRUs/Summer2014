@@ -10,8 +10,9 @@ public class EventAPI
 		mCurrentInstance = instance;
 	}
 
-	static void SetUserVelocity(int objectID, Vector3 newVelocity)
+	static public void SetUserVelocity(int objectID, Vector3 newVelocity)
 	{
+		Debug.Log(mCurrentInstance);
 		mCurrentInstance.GetObject<Pathing>(objectID).SetUserVelocity(newVelocity);
 	}
 }

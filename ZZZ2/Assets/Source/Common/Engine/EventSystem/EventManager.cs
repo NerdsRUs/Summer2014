@@ -135,6 +135,8 @@ public class EventManager : EngineObject
 			return (T)(EngineObject)this;
 		}
 
+		Debug.Log(mGameObjects.Count);
+
 		if (mGameObjects.contains(objectID) && mGameObjects[objectID] is T)
 		{
 			return (T)mGameObjects[objectID];

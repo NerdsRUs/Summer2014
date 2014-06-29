@@ -1,20 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class UserInput : MonoBehaviour 
+public class UserInput : EngineObject 
 {
-	void Start () 
+	Vector2 mCurrentVelocity;
+
+	/*void Start () 
 	{
 		UICamera.fallThrough = gameObject;
-	}
+	}*/
 	
 	// Update is called once per frame
 	void Update () {
-	
-	}
+		float horizontalMove = Input.GetAxisRaw("Horizontal");
+		float verticalMove = Input.GetAxisRaw("Vertical");
 
-	void SetUserVelocity(Vector3 newVelocity)
-	{
-		rigidbody2D.velocity = newVelocity;
+		Vector2 movement = new Vector2(horizontalMove, verticalMove);
+		movement.Normalize();
+
+		if(movement == mCurrentVelocity) {
+
+		} else {
+			AddEvent(() => EventAPI.SetUserVelocity(3, movement));
+			mCurrentVelocity = movement;
+		}
 	}
 }
