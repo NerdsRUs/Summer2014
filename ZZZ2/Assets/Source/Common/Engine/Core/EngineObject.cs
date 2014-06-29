@@ -1,23 +1,33 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using System;
 
 public class EngineObject : MonoBehaviour 
 {
 	public delegate void EventCall<T>(T callObject) where T : EngineObject;
 
 	protected int mID;
-	protected EventManager mInstance = null;
+	protected EngineManager mInstance = null;
 	protected EngineObject mParent = null;
 
 	protected int mRandomSeed = -1;
 
 	static public Script mAPIAccess;
 
+	protected List<object> mParameterList = new List<object>();
+
+	virtual protected string GetHolder()
+	{
+		return "";
+	}	
+
 	virtual protected void Start()
 	{
 		if (mInstance == null)
 		{
-			EventManager instance = Common.getComponentInParent<EventManager>(transform);
+			EngineManager instance = Common.getComponentInParent<EngineManager>(transform);
 
 			if (instance == null)
 			{
@@ -30,12 +40,49 @@ public class EngineObject : MonoBehaviour
 		}
 	}
 
-	virtual protected string GetHolder()
+	static protected T NewObject<T>(EngineObject parent, int objectID, params object[] parameters) where T : EngineObject
 	{
-		return "";
+		GameObject gameObject = new GameObject();
+		T tempObject = gameObject.AddComponent<T>();
+
+		tempObject.InitObject(parent, objectID);
+
+		gameObject.name = typeof(T).Name + "(ID: " + tempObject.GetObjectID() + ")";
+
+		tempObject.InitByParameters(parameters);
+
+		return tempObject;
 	}
 
-	virtual public void Init(EngineObject parent, int objectID = -1)
+	private void InitByParameters(params object[] parameters)
+	{
+		MethodInfo tempMethod = this.GetType().GetMethod("Init", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+		if (tempMethod == null)
+		{
+			Debug.LogError("Object initialization does not exist: '" + this.GetType() + ".Init" + "'");
+			return;
+		}
+
+		ParameterInfo[] tempInfo = tempMethod.GetParameters();
+
+		if (parameters.Length != tempInfo.Length)
+		{
+			Debug.LogError("Object initialization parameter coutns don't match: '" + this.GetType() + ".Init" + "' (" + tempInfo.Length + ") got " + parameters.Length);
+			return;
+		}
+
+		try
+		{
+			tempMethod.Invoke(this, parameters);
+		}
+		catch (Exception e)
+		{
+			Debug.LogError("Object initialization had error: " + e.InnerException.Message + "/n" + e.InnerException.StackTrace);
+		}
+	}
+
+	virtual public void InitObject(EngineObject parent, int objectID = -1)
 	{
 		if (mInstance == null)
 		{
@@ -55,11 +102,11 @@ public class EngineObject : MonoBehaviour
 			OnInit();
 		}
 
-		if (mAPIAccess == null)
-		{
-			mAPIAccess = new Script();
-			mAPIAccess.Init(GetInstance(), -1);
-		}
+		//checkDefaultScript();
+	}
+
+	virtual protected void GetInializationParameters()
+	{
 	}
 
 	virtual public void SetParent(EngineObject parent)
@@ -70,10 +117,14 @@ public class EngineObject : MonoBehaviour
 		{
 			transform.parent = mParent.GetHolder(GetHolder());
 		}
+		else
+		{
+			transform.parent = parent.transform;
+		}
 		transform.localPosition = Vector3.zero;
 	}
 
-	virtual public void InitFromStart(EventManager instance)
+	virtual public void InitFromStart(EngineManager instance)
 	{
 		if (mInstance == null)
 		{
@@ -82,7 +133,19 @@ public class EngineObject : MonoBehaviour
 			mID = mInstance.GetNextID();
 			mInstance.AddEngineObject(this);
 
+			gameObject.name = gameObject.name + "(ID: " + mID + ")";
+
 			OnInit();
+		}
+
+		//checkDefaultScript();
+	}
+
+	void checkDefaultScript()
+	{
+		if (mAPIAccess == null)
+		{
+			mAPIAccess = Script.NewScript(mInstance.gameObject, mInstance, "DefaultAPIAccessScript");
 		}
 	}
 
@@ -126,7 +189,7 @@ public class EngineObject : MonoBehaviour
 		return mID;
 	}
 
-	public EventManager GetInstance()
+	public EngineManager GetInstance()
 	{
 		return mInstance;
 	}

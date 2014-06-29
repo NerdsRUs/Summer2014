@@ -1,9 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Script : MonoBehaviour 
+public class Script : NewableMonoBehaviour
 {
-	public void Init(EventManager eventManager, int objectID)
+	static public Script NewScript(GameObject parent, EngineManager EngineManager, string name = "")
 	{
+		return NewObject<Script>(parent, EngineManager, name);
+	}
+
+	public void Init(EngineManager EngineManager, string name)
+	{
+		if (name != "")
+		{
+			gameObject.name = name;
+		}
 	}
 }

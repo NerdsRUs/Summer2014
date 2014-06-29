@@ -5,7 +5,7 @@ using System;
 
 public class EventAPIBase 
 {
-	static protected EventManager mCurrentInstance;
+	static protected EngineManager mCurrentInstance;
 
 	static protected void DoObjectFunction(int objectID, string functionName, params object[] parameters)
 	{
@@ -51,18 +51,23 @@ public class EventAPIBase
 		}
 	}
 
-	static public void SetCurrentInstance(EventManager instance)
+	static public void SetCurrentInstance(EngineManager instance)
 	{
 		mCurrentInstance = instance;
 	}
 
-	static public void CallOnObject(int objectID, string functionName, params object[] paramters)
+	static protected void CallOnObject(int objectID, string functionName, params object[] paramters)
 	{
 		Call("DoObjectFunction", objectID, functionName, paramters);
 	}
 
-	static public void Call(string functionName, params object[] paramters)
+	static protected void CallOnObject(EngineObject objectID, string functionName, params object[] paramters)
 	{
-		EventManager.GetCurrentInstance().AddEvent(functionName, paramters);
+		Call("DoObjectFunction", objectID, functionName, paramters);
 	}
+
+	static protected void Call(string functionName, params object[] paramters)
+	{
+		EngineManager.GetCurrentInstance().AddEvent(functionName, paramters);
+	}	
 }

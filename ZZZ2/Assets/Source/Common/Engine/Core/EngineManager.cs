@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class EventManager : EngineObject 
+public class EngineManager : EngineObject 
 {
 	static double UPDATE_TICK = 0.1f;
 
@@ -10,7 +10,7 @@ public class EventManager : EngineObject
 	List<EngineEvent> mCurrentEvents = new List<EngineEvent>();
 	List<EngineEvent> mPastEvents = new List<EngineEvent>();
 
-	static EventManager mCurrentInstance;
+	static EngineManager mCurrentInstance;
 
 	static bool mInitialize = false;
 	static bool mDataLoaded = false;
@@ -131,7 +131,7 @@ public class EventManager : EngineObject
 		throw new System.Exception("Invalid object ID: " + objectID + ", Type: " + typeof(T));
 	}
 
-	static public EventManager GetCurrentInstance()
+	static public EngineManager GetCurrentInstance()
 	{
 		return mCurrentInstance;
 	}

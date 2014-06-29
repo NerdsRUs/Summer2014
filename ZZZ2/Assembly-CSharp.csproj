@@ -19,7 +19,7 @@
 	<DebugType>full</DebugType>
 	<Optimize>false</Optimize>
 	<OutputPath>Temp\bin\Debug\</OutputPath>
-	<DefineConstants>DEBUG;TRACE;UNITY_4_5_0;UNITY_4_5;UNITY_STANDALONE_OSX;ENABLE_MICROPHONE;ENABLE_TEXTUREID_MAP;ENABLE_UNITYEVENTS;ENABLE_NEW_HIERARCHY ;ENABLE_AUDIO_FMOD;UNITY_STANDALONE;ENABLE_MONO;ENABLE_TERRAIN;ENABLE_SUBSTANCE;ENABLE_GENERICS;INCLUDE_WP8SUPPORT;ENABLE_MOVIES;ENABLE_WWW;ENABLE_IMAGEEFFECTS;ENABLE_WEBCAM;INCLUDE_METROSUPPORT;RENDER_SOFTWARE_CURSOR;ENABLE_NETWORK;ENABLE_PHYSICS;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_2D_PHYSICS;ENABLE_GAMECENTER;ENABLE_SHADOWS;ENABLE_AUDIO;ENABLE_NAVMESH_CARVING;ENABLE_DUCK_TYPING;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_OSX</DefineConstants>
+	<DefineConstants>DEBUG;TRACE;UNITY_4_5_1;UNITY_4_5;UNITY_STANDALONE_WIN;ENABLE_MICROPHONE;ENABLE_TEXTUREID_MAP;ENABLE_UNITYEVENTS;ENABLE_NEW_HIERARCHY ;ENABLE_AUDIO_FMOD;UNITY_STANDALONE;ENABLE_MONO;ENABLE_TERRAIN;ENABLE_SUBSTANCE;ENABLE_GENERICS;INCLUDE_WP8SUPPORT;ENABLE_MOVIES;ENABLE_WWW;ENABLE_IMAGEEFFECTS;ENABLE_WEBCAM;INCLUDE_METROSUPPORT;RENDER_SOFTWARE_CURSOR;ENABLE_NETWORK;ENABLE_PHYSICS;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_2D_PHYSICS;ENABLE_SHADOWS;ENABLE_AUDIO;ENABLE_NAVMESH_CARVING;ENABLE_DUCK_TYPING;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_WIN</DefineConstants>
 	<ErrorReport>prompt</ErrorReport>
 	<WarningLevel>4</WarningLevel>
 	<NoWarn>0169</NoWarn>
@@ -39,10 +39,10 @@
 	<Reference Include="System.Core" />
 	<Reference Include="System.Xml.Linq" />
 	<Reference Include="UnityEngine">
-	  <HintPath>/Applications/Unity/Unity.app/Contents/Frameworks/Managed/UnityEngine.dll</HintPath>
+	  <HintPath>E:/Program Files (x86)/Unity4/Editor/Data/Managed/UnityEngine.dll</HintPath>
 	</Reference>
 	<Reference Include="UnityEditor">
-	  <HintPath>/Applications/Unity/Unity.app/Contents/Frameworks/Managed/UnityEditor.dll</HintPath>
+	  <HintPath>E:/Program Files (x86)/Unity4/Editor/Data/Managed/UnityEditor.dll</HintPath>
 	</Reference>
   </ItemGroup>
   <ItemGroup>
@@ -219,13 +219,14 @@
      <Compile Include="Assets\Middleware\TimelineEditor\TimelineLayer.cs" />
      <Compile Include="Assets\Middleware\TimelineEditor\TweenTimeline.cs" />
      <Compile Include="Assets\Source\Client\Script.cs" />
-     <Compile Include="Assets\Source\Common\Engine\EventSystem\EngineEvent.cs" />
-     <Compile Include="Assets\Source\Common\Engine\EventSystem\EngineObject.cs" />
-     <Compile Include="Assets\Source\Common\Engine\EventSystem\EventAPI.cs" />
-     <Compile Include="Assets\Source\Common\Engine\EventSystem\EventAPIBase.cs" />
-     <Compile Include="Assets\Source\Common\Engine\EventSystem\EventManager.cs" />
-     <Compile Include="Assets\Source\Common\Engine\EventSystem\PacketWrapper.cs" />
-     <Compile Include="Assets\Source\Common\Engine\EventSystem\UserInput.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\EngineEvent.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\EngineManager.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\EngineObject.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\EventAPI.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\EventAPIBase.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\NewableMonoBehaviour.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\SampleObject.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\UserInput.cs" />
      <Compile Include="Assets\Source\Common\Engine\Level\Floor.cs" />
      <Compile Include="Assets\Source\Common\Engine\Level\Room.cs" />
      <Compile Include="Assets\Source\Common\Engine\Level\Tile.cs" />

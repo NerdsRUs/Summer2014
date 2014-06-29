@@ -24,9 +24,14 @@ public class UserInput : MonoBehaviour
 		} 
 		else 
 		{
-			EventAPI.SetUserVelocity(Common.GetObjectIDByTag<Pathing>("LocalPlayer"), movement);
+			EventAPI.SetUserVelocity(Common.GetObjectByTag<Pathing>("LocalPlayer"), movement);
 
 			mCurrentVelocity = movement;
+		}
+
+		if (Input.GetKeyDown(KeyCode.Space))
+		{
+			EventAPI.CloneObject(Common.GetObjectByTag<Pathing>("LocalPlayer"));
 		}
 	}
 

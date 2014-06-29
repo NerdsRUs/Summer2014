@@ -3,7 +3,8 @@ using System.Collections;
 
 public class EventAPI : EventAPIBase 
 {
-	static public void SetUserVelocity(int objectID, Vector3 newVelocity)
+	//Can use objectID(int), or the actual Class interchangably
+	static public void SetUserVelocity(Pathing objectID, Vector3 newVelocity)
 	{
 		CallOnObject(objectID, "SetUserVelocity", newVelocity);
 
@@ -20,4 +21,15 @@ public class EventAPI : EventAPIBase
 	{
 		mCurrentInstance.GetObject<Pathing>(objectID).SetUserVelocity(newVelocity);
 	}*/
+
+	//Test junk
+	static public void CloneObject(Pathing pathing)
+	{
+		Call("CloneObjectAction", pathing);
+	}
+
+	static private void CloneObjectAction(Pathing pathing)
+	{
+		SampleObject.NewSampleObject(pathing, -1, 1, 2);
+	}
 }
