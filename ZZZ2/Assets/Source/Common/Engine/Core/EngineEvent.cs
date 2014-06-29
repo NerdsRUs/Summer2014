@@ -31,7 +31,7 @@ public class EngineEvent
 
 	public void Execute(EngineManager instance)
 	{
-		MethodInfo tempMethod = typeof(EventAPI).GetMethod(mFunctionName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+		MethodInfo tempMethod = typeof(EventAPI).GetMethod(mFunctionName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
 		if (tempMethod == null)
 		{
@@ -55,12 +55,11 @@ public class EngineEvent
 			}
 		}
 
-		EventAPI.SetCurrentInstance(instance);
 		mExecutingEvent = true;
 
 		try
 		{
-			tempMethod.Invoke(null, mParameters);
+			tempMethod.Invoke(instance.GetEventAPI(), mParameters);
 		}
 		catch (Exception e)
 		{

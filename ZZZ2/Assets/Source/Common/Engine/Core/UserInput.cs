@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(EngineManager))]
 public class UserInput : MonoBehaviour
 {
 	Vector2 mCurrentVelocity;
+	EngineManager mManager;
 
 	void Start () 
 	{
 		UICamera.fallThrough = gameObject;
+		mManager = GetComponent<EngineManager>();
 	}
 	
 	void Update () 
@@ -24,14 +27,14 @@ public class UserInput : MonoBehaviour
 		} 
 		else 
 		{
-			EventAPI.SetUserVelocity(Common.GetObjectByTag<Pathing>("LocalPlayer"), movement);
+			mManager.GetEventAPI().SetUserVelocity(mManager.GetObjectByTag<Pathing>("LocalPlayer"), movement);
 
 			mCurrentVelocity = movement;
 		}
 
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
-			EventAPI.CloneObject(Common.GetObjectByTag<Pathing>("LocalPlayer"));
+			mManager.GetEventAPI().CloneObject(mManager.GetObjectByTag<Pathing>("LocalPlayer"));
 		}
 	}
 

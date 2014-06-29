@@ -40,6 +40,29 @@ public class EngineObject : MonoBehaviour
 		}
 	}
 
+	protected void InitStartUpObjects()
+	{
+		EngineObject[] objects = GetComponentsInChildren<EngineObject>(true);
+
+		List<EngineObject> tempList = new List<EngineObject>();
+
+		for (int i = 0; i < objects.Length; i++)
+		{
+			tempList.Add(objects[i]);
+		}
+
+		tempList.Sort(	delegate(EngineObject a, EngineObject b)
+						{
+							return a.name.CompareTo(b.name);
+						}
+						);
+
+		for (int i = 0; i < tempList.Count; i++)
+		{
+			tempList[i].Start();
+		}		
+	}
+
 	static protected T NewObject<T>(EngineObject parent, int objectID, params object[] parameters) where T : EngineObject
 	{
 		GameObject gameObject = new GameObject();
@@ -137,6 +160,8 @@ public class EngineObject : MonoBehaviour
 
 			OnInit();
 		}
+
+		InitStartUpObjects();
 
 		//checkDefaultScript();
 	}
@@ -237,5 +262,20 @@ public class EngineObject : MonoBehaviour
 	public EngineObject getParent()
 	{
 		return mParent;
+	}
+
+	protected double GetCurrentTime()
+	{
+		return mInstance.GetEngineTime();
+	}
+
+	virtual public EventAPI GetEventAPI()
+	{
+		return mInstance.GetEventAPI();
+	}
+
+	virtual public bool IsServer()
+	{
+		return mInstance.IsServer();
 	}
 }

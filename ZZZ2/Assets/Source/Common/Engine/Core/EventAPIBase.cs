@@ -5,9 +5,14 @@ using System;
 
 public class EventAPIBase 
 {
-	static protected EngineManager mCurrentInstance;
+	protected EngineManager mCurrentInstance;
 
-	static protected void DoObjectFunction(int objectID, string functionName, params object[] parameters)
+	public void Init(EngineManager instance)
+	{
+		mCurrentInstance = instance;
+	}
+
+	protected void DoObjectFunction(int objectID, string functionName, params object[] parameters)
 	{
 		EngineObject callObject = mCurrentInstance.GetObject<EngineObject>(objectID);
 
@@ -51,23 +56,41 @@ public class EventAPIBase
 		}
 	}
 
-	static public void SetCurrentInstance(EngineManager instance)
+	protected void NewEventFromObject(int objectID, string functionName, params object[] paramaters)
 	{
-		mCurrentInstance = instance;
+		NewEvent("DoObjectFunction", objectID, functionName, paramaters);
 	}
 
-	static protected void CallOnObject(int objectID, string functionName, params object[] paramters)
+	protected void NewEventFromObject(EngineObject objectID, string functionName, params object[] paramaters)
 	{
-		Call("DoObjectFunction", objectID, functionName, paramters);
+		NewEvent("DoObjectFunction", objectID, functionName, paramaters);
 	}
 
-	static protected void CallOnObject(EngineObject objectID, string functionName, params object[] paramters)
+	protected void NewEvent(string functionName, params object[] paramaters)
 	{
-		Call("DoObjectFunction", objectID, functionName, paramters);
+		mCurrentInstance.AddEvent(functionName, paramaters);
+
+		if (mCurrentInstance.IsServer())
+		{
+			NewEventOnClient(0, functionName, paramaters);
+		}
 	}
 
-	static protected void Call(string functionName, params object[] paramters)
+
+	protected void NewEventOnClientFromObject(int clientIdentifer, int objectID, string functionName, params object[] paramaters)
 	{
-		EngineManager.GetCurrentInstance().AddEvent(functionName, paramters);
+		NewEventOnClient(clientIdentifer, "DoObjectFunction", objectID, functionName, paramaters);
+	}
+
+	protected void NewEventOnClientFromObject(int clientIdentifer, EngineObject objectID, string functionName, params object[] paramaters)
+	{
+		NewEventOnClient(clientIdentifer, "DoObjectFunction", objectID, functionName, paramaters);
+	}
+
+	protected void NewEventOnClient(int clientIdentifer, string functionName, params object[] paramaters)
+	{
+		//Send event to client
+
+		Common.getClientManager().GetEventAPI().NewEvent(functionName, paramaters);
 	}	
 }

@@ -12,17 +12,8 @@ using UnityEditor;
 
 public class Common
 {
-	public const int LOBBY_ID = 200002;
-	public const int GUILD_LOBBY_ID = 200004;
-
 	public const int BIG_NUMBER = 9999999;
 	public const int BIG_TIME = 36000;
-
-	public const string IMAGE_ROOT = "IMAGE_ROOT/";
-	public const string MOVIE_ROOT = "MOVIE_ROOT/";
-	public const string EXTERNAL_DATA_ROOT = "EXTERNAL_DATA_ROOT/";
-	public const string SOUND_ROOT = "SOUND_ROOT/";
-	public const string ASSET_IMAGE_ROOT = "IMAGE_ROOT/";
 
 
 	public const int DAY_RESET_HOUR = 11;
@@ -30,8 +21,6 @@ public class Common
 	public const float GAME_WIDTH = 900;
 	public const float GAME_HEIGHT = 600;
 	public const float DEFAULT_FADE_TME = 0.5f;
-
-	public const int ENEMY_ID_OFFSET = 10000;
 
 	public const string COLOR_HOSTILE = "AA2222";
 	public const string COLOR_FRIENDLY = "22AA22";
@@ -50,73 +39,11 @@ public class Common
 	public static Color COLOR_LEGENDARY = new Color(1.0f, 0.8823f, 0.3058f, 1.0f);
 	public static Color COLOR_UNIQUE = new Color(1.0f, 0.5f, .0745f, 1.0f);
 
-	public const int FIGHTER_CHARACTER_ID = 1;
-	public const int HUNTER_CHARACTER_ID = 2;
-	public const int MAGE_CHARACTER_ID = 3;
-	public const int PRIEST_CHARACTER_ID = 4;
-	public const int KNIGHT_CHARACTER_ID = 5;
-
-	public const int LAYER_NORMAL = 0;
-	public const int LAYER_HIDDEN = 12;
-
-	public const int MAX_LEVEL = 60;
-	public const int MAX_PLAYER_LEVEL = 30;
-	public const int MAX_DUNGEON_LEVEL = 1;
-	public const int MAX_GOLD_STARS = 100;
-
-	public const int MASK_LAYER = 16;
-
-	public const float INTERUPT_TIME = 7.0f;
-	public const float IMMOBILIZE_DAMAGE_REDUCTION = 0.6f;
-	public const float PET_INTERUPT_TIME_OUT = 20.0f;
-
-	public const int MAIN_QUEST_BUFF = 10335;
-	public const float MAIN_QUEST_BUFF_VALUE = -0.33f;
-
-
-	static public Color OUTLINE_COLOR_ALLY = new Color(.1f, .9f, .1f);
-	static public Color OUTLINE_COLOR_ENEMY = new Color(.9f, .1f, .1f);
-	static public Color OUTLINE_COLOR_CLICKABLE = new Color(1.0f, 1.0f, .1f);
-
-	public const LANGUAGE_TYPE LANGUAGE = LANGUAGE_TYPE.ENGLISH;
-
-	//static AudioController mEditorController = null;
 	static string mLastScene = "";
-
-	public enum LANGUAGE_TYPE
-	{
-		ENGLISH = 1,
-		JAPANESE
-	}
-
-	public enum ERROR_ACTION
-	{
-		NONE = 0,
-		REFRESH_LOGIN,
-		CLEAR_MAIL
-	}
-
-	public enum DPS_TYPE
-	{
-		NORMAL,
-		MEDIUM,
-		BIG,
-	}
 
 	static MD5CryptoServiceProvider mMD5 = new MD5CryptoServiceProvider();
 
-	//static float mLastSyncTimeLocal = 0;
-	//static float mLastSyncTimeServer = 0;
-	static double mCurrentTime = 0;
-	static double mLastTimeOffset = 0;
-	static double mPrevTimeOffset = 0;
-	static double mLastTimeUpdate = 0;
-
 	static public float WORLD_SCALE = 100;
-
-	static DateTime mStartTime;
-
-	static private bool mIsGraphical = false;
 
 	static private Dictionary<string, object> mServerResources = new Dictionary<string, object>();
 	static private Dictionary<string, object> mClientResources = new Dictionary<string, object>();
@@ -126,26 +53,15 @@ public class Common
 
 	static Transform mPoolRoot;
 
-	static Texture2D mBlankTexture;
-
 	static List<string> mPreloadedObjects = new List<string>();
 
 	static System.Random mRandom = new System.Random();
 
-	static Vector3 mMousePosition;
-	static float mMouseSensativity = 1.0f;
+	static int CLIENT_LAYER = 9;
+	static int SERVER_LAYER = 8;
 
-	static float mTimestampOffset = 0;
-
-	static public void setGraphical(bool state)
-	{
-		mIsGraphical = state;
-	}
-
-	static public bool isGraphical()
-	{
-		return mIsGraphical;
-	}
+	static EngineManager mServer;
+	static EngineManager mClient;
 
 	static public float roundTo(float value, int digits)
 	{
@@ -299,40 +215,6 @@ public class Common
 		{
 			setAnimationTime(child, animation, time);
 		}
-	}
-	static public Vector3 getMousePosition()
-	{
-		Vector3 tempVector = Input.mousePosition;
-
-		tempVector.x *= GAME_WIDTH / Screen.width;
-		tempVector.y *= GAME_HEIGHT / Screen.height;
-
-		return tempVector;// mMousePosition;
-	}
-
-	static public Vector3 getRealMousePosition()
-	{
-		return Input.mousePosition;
-	}
-
-	static public void updateMouse()
-	{
-		Vector3 deltaMouse = Vector3.zero;
-
-		deltaMouse.x = Input.GetAxis("Mouse X") * mMouseSensativity;
-		deltaMouse.y = Input.GetAxis("Mouse Y") * mMouseSensativity;
-
-		mMousePosition += deltaMouse;
-	}
-
-	static public void setMousePosition(Vector3 position)
-	{
-		mMousePosition = position;
-	}
-
-	static public void setMouseSensativity(float sensativity)
-	{
-		mMouseSensativity = sensativity;
 	}
 
 	static public void setParticleScale(Transform transform, Vector3 scale)
@@ -557,24 +439,14 @@ public class Common
 		return time.Date;
 	}
 
-	static public DateTime getStartTime()
-	{
-		return mStartTime;
-	}
-
 	static public DateTime getDateTime()
 	{
-		return TimeZoneInfo.ConvertTimeToUtc(DateTime.Now).AddSeconds(mTimestampOffset);
+		return TimeZoneInfo.ConvertTimeToUtc(DateTime.Now);
 	}
 
 	static public DateTime getLocalDateTime()
 	{
 		return TimeZoneInfo.ConvertTimeToUtc(DateTime.Now);
-	}
-
-	static public float getOffset()
-	{
-		return mTimestampOffset;
 	}
 
 	static public DateTime getDateTimeFromTimestamp(uint timestamp)
@@ -860,11 +732,6 @@ public class Common
 
 		return hourString + ":" + minuteString + ":" + secondString;
 	}
-
-	/*static public float dateTimeToTime(DateTime time)
-	{
-		return (float)(time - mStartTime).TotalSeconds;
-	}*/
 
 	static public DateTime getEpoch()
 	{
@@ -2089,34 +1956,79 @@ public class Common
 		{
 			randomList.Add(i);
 		}
-	}
+	}	
 
-	public static T GetObjectByTag<T>(string tag) where T: EngineObject
+	/*public static double getCurrentTime()
+	{
+		return EngineManager.GetCurrentInstance().GetEngineTime();
+	}*/
+
+	public static T GetObjectByTag<T>(string tag) where T : EngineObject
 	{
 		GameObject[] gameObjects = GameObject.FindGameObjectsWithTag(tag);
-		foreach(GameObject currentObject in gameObjects) {
+		foreach (GameObject currentObject in gameObjects)
+		{
 			T currentComponent = currentObject.GetComponent<T>();
 
-			if(currentComponent) {
-				return currentComponent; 
+			if (currentComponent)
+			{
+				return currentComponent;
 			}
 		}
 
 		return null;
 	}
 
-	public static int GetObjectIDByTag<T>(string tag) where T: EngineObject
+	public static int GetObjectIDByTag<T>(string tag) where T : EngineObject
 	{
 		GameObject[] gameObjects = GameObject.FindGameObjectsWithTag(tag);
-		foreach(GameObject currentObject in gameObjects) {
+		foreach (GameObject currentObject in gameObjects)
+		{
 			T currentComponent = currentObject.GetComponent<T>();
-			
-			if(currentComponent) {
-				return currentComponent.GetObjectID(); 
+
+			if (currentComponent)
+			{
+				return currentComponent.GetObjectID();
 			}
 		}
-		
+
 		return 0;
+	}
+
+	public static EngineManager getClientManager()
+	{
+		if (mClient == null)
+		{
+			EngineManager[] gameObjects = GameObject.FindObjectsOfType<EngineManager>();
+			foreach (EngineManager currentInstance in gameObjects)
+			{
+				if (currentInstance.gameObject.layer == CLIENT_LAYER)
+				{
+					mClient = currentInstance;
+					break;
+				}
+			}
+		}
+
+		return mClient;
+	}
+
+	public static EngineManager getServerManager()
+	{
+		if (mServer == null)
+		{
+			EngineManager[] gameObjects = GameObject.FindObjectsOfType<EngineManager>();
+			foreach (EngineManager currentInstance in gameObjects)
+			{
+				if (currentInstance.gameObject.layer == SERVER_LAYER)
+				{
+					mServer = currentInstance;
+					break;
+				}
+			}
+		}
+
+		return mServer;
 	}
 }
 

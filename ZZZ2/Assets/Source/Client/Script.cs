@@ -3,12 +3,12 @@ using System.Collections;
 
 public class Script : NewableMonoBehaviour
 {
-	static public Script NewScript(GameObject parent, EngineManager EngineManager, string name = "")
+	static public Script NewScript(GameObject parent, EngineManager engineManager, string name = "")
 	{
-		return NewObject<Script>(parent, EngineManager, name);
+		return NewObject<Script>(parent, engineManager, name);
 	}
 
-	public void Init(EngineManager EngineManager, string name)
+	public void Init(EngineManager engineManager, string name)
 	{
 		if (name != "")
 		{

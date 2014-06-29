@@ -10,7 +10,7 @@ public class EngineManager : EngineObject
 	List<EngineEvent> mCurrentEvents = new List<EngineEvent>();
 	List<EngineEvent> mPastEvents = new List<EngineEvent>();
 
-	static EngineManager mCurrentInstance;
+	//static EngineManager mCurrentInstance;
 
 	static bool mInitialize = false;
 	static bool mDataLoaded = false;
@@ -19,11 +19,20 @@ public class EngineManager : EngineObject
 	double mLastUpdateTime = -UPDATE_TICK;
 	double mTickTime = -UPDATE_TICK;
 
+	EventAPI mEventAPI;
+
+	bool mIsServer;
+
+	//Test stuff
+	public bool isServer;
+
 	void Start()
 	{
+		mIsServer = isServer;
+
 		Init();
 
-		mCurrentInstance = this;
+		//mCurrentInstance = this;
 
 		if (!mDataLoaded)
 		{
@@ -31,6 +40,8 @@ public class EngineManager : EngineObject
 
 			DataManager.LoadData();
 		}
+
+		InitStartUpObjects();
 	}
 
 	public void Init()
@@ -44,6 +55,14 @@ public class EngineManager : EngineObject
 
 			OnInit();
 		}
+	}
+
+	public override void OnInit()
+	{
+		mEventAPI = new EventAPI();
+		mEventAPI.Init(this);
+
+		base.OnInit();
 	}
 
 	void Update()
@@ -131,13 +150,57 @@ public class EngineManager : EngineObject
 		throw new System.Exception("Invalid object ID: " + objectID + ", Type: " + typeof(T));
 	}
 
-	static public EngineManager GetCurrentInstance()
+	/*static public EngineManager GetCurrentInstance()
 	{
 		return mCurrentInstance;
-	}
+	}*/
 
 	public void MakeEvent(EngineEvent callEvent)
 	{
 		mCurrentEvents.Add(callEvent);
+	}
+
+	override public EventAPI GetEventAPI()
+	{
+		return mEventAPI;
+	}
+
+	public T GetObjectByTag<T>(string tag) where T : EngineObject
+	{
+		GameObject[] gameObjects = GameObject.FindGameObjectsWithTag(tag);
+
+		foreach (GameObject currentObject in gameObjects)
+		{
+			T currentComponent = currentObject.GetComponent<T>();
+
+			if (currentComponent && currentComponent.GetInstance() == this)
+			{
+				return currentComponent;
+			}
+		}
+
+		return null;
+	}
+
+	public int GetObjectIDByTag<T>(string tag) where T : EngineObject
+	{
+		GameObject[] gameObjects = GameObject.FindGameObjectsWithTag(tag);
+
+		foreach (GameObject currentObject in gameObjects)
+		{
+			T currentComponent = currentObject.GetComponent<T>();
+
+			if (currentComponent && currentComponent.GetInstance() == this)
+			{
+				return currentComponent.GetObjectID();
+			}
+		}
+
+		return 0;
+	}
+
+	override public bool IsServer()
+	{
+		return mIsServer;
 	}
 }

@@ -224,6 +224,7 @@
      <Compile Include="Assets\Source\Common\Engine\Core\EngineObject.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\EventAPI.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\EventAPIBase.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\Networking\NetworkClient.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\NewableMonoBehaviour.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\SampleObject.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\UserInput.cs" />
@@ -234,6 +235,7 @@
      <Compile Include="Assets\Source\Common\Engine\Objects\Character\Pathing.cs" />
      <Compile Include="Assets\Source\Common\Engine\Objects\Character\Stats.cs" />
      <Compile Include="Assets\Source\Common\Engine\Objects\Entity.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Objects\PhysicObject.cs" />
      <Compile Include="Assets\Source\Common\StaticData\DataManager.cs" />
      <Compile Include="Assets\Source\Library\BinaryHeap.cs" />
      <Compile Include="Assets\Source\Library\Common.cs" />
