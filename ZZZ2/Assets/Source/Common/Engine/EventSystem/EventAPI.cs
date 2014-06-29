@@ -3,6 +3,7 @@ using System.Collections;
 
 public class EventAPI : EventAPIBase 
 {
+
 	static public void SetUserVelocity(int objectID, Vector3 newVelocity)
 	{
 		Call("SetUserVelocityAction", objectID, newVelocity);
@@ -12,4 +13,5 @@ public class EventAPI : EventAPIBase
 	{
 		mCurrentInstance.GetObject<Pathing>(objectID).SetUserVelocity(newVelocity);		
 	}
+	
 }

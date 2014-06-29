@@ -2090,6 +2090,34 @@ public class Common
 			randomList.Add(i);
 		}
 	}
+
+	public static T GetObjectByTag<T>(string tag) where T: EngineObject
+	{
+		GameObject[] gameObjects = GameObject.FindGameObjectsWithTag(tag);
+		foreach(GameObject currentObject in gameObjects) {
+			T currentComponent = currentObject.GetComponent<T>();
+
+			if(currentComponent) {
+				return currentComponent; 
+			}
+		}
+
+		return null;
+	}
+
+	public static int GetObjectIDByTag<T>(string tag) where T: EngineObject
+	{
+		GameObject[] gameObjects = GameObject.FindGameObjectsWithTag(tag);
+		foreach(GameObject currentObject in gameObjects) {
+			T currentComponent = currentObject.GetComponent<T>();
+			
+			if(currentComponent) {
+				return currentComponent.GetObjectID(); 
+			}
+		}
+		
+		return 0;
+	}
 }
 
 
