@@ -1,15 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EventAPI : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
+public class EventAPI {
 	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+	static void SetUserVelocity(int objectID, Vector3 newVelocity)
+	{
+		EventManger.GetObject<Pathing>(objectID).SetUserVelocity(newVelocity);
 	}
 }
