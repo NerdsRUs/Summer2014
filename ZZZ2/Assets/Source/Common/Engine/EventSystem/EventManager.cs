@@ -86,18 +86,6 @@ public class EventManager : EngineObject
 		}
 	}
 
-	void OnPress(bool isDown)
-	{
-	}
-
-	void OnClick()
-	{
-	}
-
-	void OnHover(bool isOver)
-	{
-	}
-
 	public double GetEngineTime()
 	{
 		return Time.time;

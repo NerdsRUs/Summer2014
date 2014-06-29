@@ -29,4 +29,17 @@ public class UserInput : MonoBehaviour
 			mCurrentVelocity = movement;
 		}
 	}
+
+	//These events fall through from the NGUI system
+	void OnPress(bool isDown)
+	{
+	}
+
+	void OnClick()
+	{
+	}
+
+	void OnHover(bool isOver)
+	{
+	}
 }

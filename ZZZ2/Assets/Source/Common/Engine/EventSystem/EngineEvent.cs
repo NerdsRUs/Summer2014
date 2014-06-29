@@ -23,8 +23,7 @@ public class EngineEvent
 
 	public void Execute(EventManager instance)
 	{
-		Debug.Log(mFunctionName);
-		MethodInfo tempMethod = typeof(EventAPI).GetMethod(mFunctionName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
+		MethodInfo tempMethod = typeof(EventAPI).GetMethod(mFunctionName, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
 		if (tempMethod == null)
 		{
