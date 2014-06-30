@@ -56,6 +56,56 @@ public class EventAPIBase
 		}
 	}
 
+	public string GetCommandString(params object[] parameters)
+	{
+		string functionName = (string)parameters[1];
+		int objectID = (int)parameters[0];
+
+		EngineObject callObject = mCurrentInstance.GetObject<EngineObject>(objectID);
+
+		if (callObject == null)
+		{
+			return "Event object function's call object does not exist: " + objectID;
+		}
+
+		MethodInfo tempMethod = callObject.GetType().GetMethod(functionName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+		if (tempMethod == null)
+		{
+			return "Event object function does not exist: '" + functionName + "' " + objectID;
+		}
+
+		ParameterInfo[] tempInfo = tempMethod.GetParameters();
+
+		if (parameters.Length - 2 != tempInfo.Length)
+		{
+			return "Event object function parameter counts don't match: '" + functionName + "' " + objectID + " " + tempInfo.Length + " got " + (parameters.Length - 2);
+		}
+
+		string command = functionName + "(";
+
+		for (int i = 2; i < parameters.Length; i++)
+		{
+			if (parameters[i].GetType() == typeof(object[]))
+			{
+				command += Convert.ChangeType(((object[])parameters[i])[0], tempInfo[i - 2].ParameterType).ToString();
+			}
+			else
+			{
+				command += Convert.ChangeType(parameters[i], tempInfo[i - 2].ParameterType).ToString();
+			}
+
+			if (i + 1 < parameters.Length)
+			{
+				command += ", ";
+			}
+		}
+
+		command += ")";
+
+		return command;
+	}
+
 	protected void NewEventFromObject(int objectID, string functionName, params object[] paramaters)
 	{
 		NewEvent("DoObjectFunction", objectID, functionName, paramaters);

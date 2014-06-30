@@ -223,7 +223,7 @@ public class EngineObject : MonoBehaviour
 	{
 		EngineEvent newEvent = new EngineEvent();
 
-		newEvent.Init(functionName, Time.time, transform.position, parameters);
+		newEvent.Init(mInstance, functionName, Time.time, transform.position, parameters);
 
 		mInstance.MakeEvent(newEvent);
 	}

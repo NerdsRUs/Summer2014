@@ -24,7 +24,10 @@ public class EventAPI : EventAPIBase
 
 	public void UpdatePhysics(PhysicObject objectID, Vector3 position, Vector3 scale, Vector3 rotation, Vector3 velocity, float angularVelocity)
 	{
-		NewEventFromObject(objectID, "DoUpdate", position, scale, rotation, velocity, angularVelocity);
+		if (mCurrentInstance.IsServer())
+		{
+			NewEventFromObject(objectID, "DoUpdate", position, scale, rotation, velocity, angularVelocity);
+		}
 	}
 
 	//Test junk

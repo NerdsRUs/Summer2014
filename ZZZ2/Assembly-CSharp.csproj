@@ -237,6 +237,8 @@
      <Compile Include="Assets\Source\Common\Engine\Objects\Entity.cs" />
      <Compile Include="Assets\Source\Common\Engine\Objects\PhysicObject.cs" />
      <Compile Include="Assets\Source\Common\StaticData\DataManager.cs" />
+     <Compile Include="Assets\Source\Debug\EventDebug.cs" />
+     <Compile Include="Assets\Source\Debug\EventDebugObject.cs" />
      <Compile Include="Assets\Source\Library\BinaryHeap.cs" />
      <Compile Include="Assets\Source\Library\Common.cs" />
      <Compile Include="Assets\Source\Library\DataLoader.cs" />

@@ -10,15 +10,17 @@ public class EngineEvent
 	Vector3 mPosition;
 	string mFunctionName;
 	object[] mParameters;
+	EngineManager mEngineManager;
 
 	static bool mExecutingEvent;
 
-	public void Init(string eventName, float time, Vector3 position, params object[] parameters)
+	public void Init(EngineManager instance, string eventName, float time, Vector3 position, params object[] parameters)
 	{
 		mTime = time;
 		mPosition = position;
 		mFunctionName = eventName;
 		mParameters = parameters;
+		mEngineManager = instance;
 
 		for (int i = 0; i < mParameters.Length; i++)
 		{
@@ -29,7 +31,7 @@ public class EngineEvent
 		}
 	}
 
-	public void Execute(EngineManager instance)
+	public void Execute()
 	{
 		MethodInfo tempMethod = typeof(EventAPI).GetMethod(mFunctionName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
@@ -51,7 +53,7 @@ public class EngineEvent
 		{
 			if (tempInfo[i].ParameterType.BaseType == typeof(EngineObject) && mParameters[i].GetType() == typeof(int))
 			{
-				mParameters[i] = instance.GetObject<EngineObject>((int)mParameters[i]);
+				mParameters[i] = mEngineManager.GetObject<EngineObject>((int)mParameters[i]);
 			}
 		}
 
@@ -59,7 +61,7 @@ public class EngineEvent
 
 		try
 		{
-			tempMethod.Invoke(instance.GetEventAPI(), mParameters);
+			tempMethod.Invoke(mEngineManager.GetEventAPI(), mParameters);
 		}
 		catch (Exception e)
 		{
@@ -69,13 +71,51 @@ public class EngineEvent
 		mExecutingEvent = false;
 	}
 
-	public string getCommandString()
+	public string GetCommandString()
 	{
-		return mFunctionName;
+		if (mFunctionName == "DoObjectFunction")
+		{
+			return mEngineManager.GetEventAPI().GetCommandString(mParameters);
+		}
+
+		MethodInfo tempMethod = typeof(EventAPI).GetMethod(mFunctionName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+
+		if (tempMethod == null)
+		{
+			return "Event function does not exist: '" + mFunctionName + "'";
+		}
+
+		ParameterInfo[] tempInfo = tempMethod.GetParameters();
+
+		if (mParameters.Length != tempInfo.Length)
+		{
+			return "Event function parameter coutns don't match: '" + mFunctionName + "'" + tempInfo.Length + " got " + mParameters.Length;
+		}
+
+		string command = mFunctionName + "(";
+
+		for (int i = 0; i < mParameters.Length; i++)
+		{
+			command += mParameters[i].ToString();
+
+			if (i + 1 < mParameters.Length)
+			{
+				command += ", ";
+			}
+		}
+
+		command += ")";
+
+		return command;
 	}
 
-	public string getName()
+	public string GetName()
 	{
+		if (mFunctionName == "DoObjectFunction")
+		{
+			return mTime.ToString("0.00") + ") " +  mParameters[0].ToString() + " -> " + mParameters[1].ToString();
+		}
+
 		return mTime.ToString("0.00") + ") " + mFunctionName;
 	}
 

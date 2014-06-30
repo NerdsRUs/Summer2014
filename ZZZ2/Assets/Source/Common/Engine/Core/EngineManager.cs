@@ -23,8 +23,13 @@ public class EngineManager : EngineObject
 
 	bool mIsServer;
 
+	[SerializeField]
+	private bool useDebugger;
+	EventDebug mEventDebug;
+
 	//Test stuff
-	public bool isServer;
+	[SerializeField]
+	private bool isServer;
 
 	void Start()
 	{
@@ -42,6 +47,16 @@ public class EngineManager : EngineObject
 		}
 
 		InitStartUpObjects();
+
+		if (useDebugger)
+		{
+			GameObject gameObject = new GameObject();
+
+			gameObject.transform.parent = transform;
+			gameObject.name = "EventDebug";
+
+			mEventDebug = gameObject.AddComponent<EventDebug>();
+		}
 	}
 
 	public void Init()
@@ -98,9 +113,13 @@ public class EngineManager : EngineObject
 	{
 		while (mCurrentEvents.Count > 0)
 		{
-			//EventDebug.addEvent(mCurrentEvents[0]);
+			if (mEventDebug != null)
+			{
+				mEventDebug.addEvent(mCurrentEvents[0]);
+				mEventDebug.name = "EventDebug (" + mEventDebug.GetEventCount() + ")";
+			}
 
-			mCurrentEvents[0].Execute(this);
+			mCurrentEvents[0].Execute();
 			mCurrentEvents.RemoveAt(0);
 		}
 	}
