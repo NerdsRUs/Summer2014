@@ -64,8 +64,7 @@ public class EventAPIBase
 	{
 		string functionName = (string)parameters[1];
 
-		int objectID;
-		
+		int objectID;		
 		if (parameters[0].GetType() == typeof(int))
 		{
 			objectID  = (int)parameters[0];
@@ -95,22 +94,24 @@ public class EventAPIBase
 
 		ParameterInfo[] tempInfo = tempMethod.GetParameters();
 
-		if (parameters.Length - 2 != tempInfo.Length)
+		parameters = (object[])parameters[2];
+
+		if (parameters.Length != tempInfo.Length)
 		{
-			return "Event object function parameter counts don't match: '" + functionName + "' " + objectID + " " + tempInfo.Length + " got " + (parameters.Length - 2);
+			return "Event object function parameter counts don't match: '" + functionName + "' " + objectID + " " + tempInfo.Length + " got " + parameters.Length;
 		}
 
 		string command = functionName + "(";
 
-		for (int i = 2; i < parameters.Length; i++)
+		for (int i = 0; i < parameters.Length; i++)
 		{
 			if (parameters[i].GetType() == typeof(object[]))
 			{
-				command += Convert.ChangeType(((object[])parameters[i])[0], tempInfo[i - 2].ParameterType).ToString();
+				command += Convert.ChangeType(((object[])parameters[i])[0], tempInfo[i].ParameterType).ToString();
 			}
 			else
 			{
-				command += Convert.ChangeType(parameters[i], tempInfo[i - 2].ParameterType).ToString();
+				command += Convert.ChangeType(parameters[i], tempInfo[i].ParameterType).ToString();
 			}
 
 			if (i + 1 < parameters.Length)

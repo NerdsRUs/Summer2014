@@ -5,19 +5,63 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PhysicObject : SyncObject 
 {
+	/*Vector3 mLastVelocity;
+	float mLastAngularVelocity;
+	float mLastInertia;
+
+	bool mCancelCollision;*/
+
 	void OnCollisionEnter2D()
 	{
 		ForceUpdate();
+
+		//CheckCollision();
 	}
+
+	/*void OnCollisionStay()
+	{
+		CheckCollision();
+	}*/
 
 	void OnCollisionExit2D()
 	{
 		ForceUpdate();
+
+		//CheckCollision();
 	}
+
+	/*void CheckCollision()
+	{
+		if (!IsOnHost())
+		{
+			if (GetObjectID() == 2)
+			{
+				Debug.Log("Cancel collision " + Time.frameCount + " " + mLastAngularVelocity + " -> " + rigidbody2D.angularVelocity);
+			}
+
+			mCancelCollision = true;
+		}
+	}*/
+
+	/*void FixedUpdate()
+	{
+		if (mCancelCollision)
+		{
+			rigidbody2D.velocity = mLastVelocity;
+			rigidbody2D.angularVelocity = mLastAngularVelocity;
+			rigidbody2D.inertia = mLastInertia;
+
+			mCancelCollision = false;
+		}
+
+		mLastVelocity = rigidbody2D.velocity;
+		mLastAngularVelocity = rigidbody2D.angularVelocity;
+		mLastInertia = rigidbody2D.inertia;
+	}*/
 
 	protected override bool CheckIsAtRest()
 	{
-		return false;// rigidbody2D.velocity.sqrMagnitude == 0 && Mathf.Abs(rigidbody2D.angularVelocity) == 0;
+		return rigidbody2D.velocity.sqrMagnitude == 0 && Mathf.Abs(rigidbody2D.angularVelocity) == 0;
 	}
 
 	override protected void DoSyncData()

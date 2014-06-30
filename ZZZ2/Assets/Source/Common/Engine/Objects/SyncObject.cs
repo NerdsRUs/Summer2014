@@ -4,45 +4,63 @@ using System.Collections;
 public class SyncObject : EngineObject 
 {
 	const float DEFAULT_SYNC_RATE = 0.5f;
-	const float FORCED_SYNC_RATE = 0.1f;
+	const float FORCED_SYNC_RATE = 0.05f;
 
 	double mNextSyncTime = 0;
 	double mLastSyncTime = 0;
 
 	bool mAtRest = true;
 	bool mWasAtRest = true;
+	bool mForceSync = true;
+
+	virtual protected float GetDefaultSyncRate()
+	{
+		return DEFAULT_SYNC_RATE;
+	}
+
+	virtual protected float GetForcedSyncRate()
+	{
+		return FORCED_SYNC_RATE;
+	}
 
 	void LateUpdate()
 	{
 		if (IsOnHost())
 		{
-			if (GetCurrentTime() >= mNextSyncTime)
+			if (GetCurrentTime() >= mNextSyncTime || mForceSync)
 			{
 				SyncData();
 			}
 		}
 	}
 
-	protected void ForceUpdate()
+	protected void ForceUpdate(bool forceSync = false)
 	{
 		if (IsOnHost())
 		{
-			if (GetCurrentTime() >= mLastSyncTime + FORCED_SYNC_RATE)
+			mForceSync = forceSync;
+
+			if (GetCurrentTime() >= mLastSyncTime + GetForcedSyncRate())
 			{
 				SyncData();
 			}
 			else
 			{
-				mNextSyncTime = mLastSyncTime + FORCED_SYNC_RATE;
+				mNextSyncTime = mLastSyncTime + GetForcedSyncRate();
 			}
 		}
 	}
 
-	void SyncData()
+	public void DidSyncData()
 	{
 		mLastSyncTime = GetCurrentTime();
-		mNextSyncTime = mLastSyncTime + DEFAULT_SYNC_RATE;	
+		mNextSyncTime = mLastSyncTime + GetDefaultSyncRate();
 
+		mForceSync = false;
+	}
+
+	void SyncData()
+	{
 		mAtRest = CheckIsAtRest();
 
 		if (mAtRest == false || mWasAtRest == false)
@@ -51,6 +69,8 @@ public class SyncObject : EngineObject
 		}
 
 		mWasAtRest = mAtRest;
+
+		DidSyncData();
 	}
 
 	virtual protected void DoSyncData()
