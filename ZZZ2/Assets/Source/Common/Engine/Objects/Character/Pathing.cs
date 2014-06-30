@@ -38,6 +38,11 @@ public class Pathing : SyncObject
 		//Delay all movement by the lag time (Don't delay stop commands
 		if (mMoveVelocity.sqrMagnitude != 0)
 		{
+			if (mQueueTime != 0)
+			{
+				DoQueuedUpdate();
+			}
+
 			mMoveVelocity = newVelocity;
 
 			transform.localPosition = position;
@@ -51,15 +56,20 @@ public class Pathing : SyncObject
 		}
 	}
 
+	void DoQueuedUpdate()
+	{
+		mQueueTime = 0;
+
+		mMoveVelocity = mQueuedVelocity;
+
+		transform.localPosition = mQueuedPosition;
+	}
+
 	void Update()
 	{
 		if (mQueueTime != 0 && GetCurrentTime() >= mQueueTime)
 		{
-			mQueueTime = 0;
-
-			mMoveVelocity = mQueuedVelocity;
-
-			transform.localPosition = mQueuedPosition;
+			DoQueuedUpdate();			
 		}
 	}
 
