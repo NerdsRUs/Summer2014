@@ -45,6 +45,11 @@ public class Pathing : SyncObject
 		{
 			mMoveVelocity = newVelocity;
 
+			if (IsServer())
+			{
+				Debug.Log("Update position");
+			}
+
 			transform.localPosition = position;
 		}
 		else
@@ -62,6 +67,11 @@ public class Pathing : SyncObject
 
 		mMoveVelocity = mQueuedVelocity;
 
+		if (IsServer())
+		{
+			Debug.Log("Update position");
+		}
+
 		transform.localPosition = mQueuedPosition;
 	}
 
@@ -73,13 +83,15 @@ public class Pathing : SyncObject
 		}
 	}
 
-	virtual protected void FixedUpdate()
+	override protected void LateUpdate()
 	{
 		Vector2 deltaVelocity = rigidbody2D.velocity - mLastVelocity;
 
 		rigidbody2D.velocity = new Vector2(mMoveVelocity.x, mMoveVelocity.y) + deltaVelocity;
 
 		mLastVelocity = rigidbody2D.velocity;
+
+		base.LateUpdate();
 	}
 
 	protected override bool CheckIsAtRest()
@@ -91,11 +103,11 @@ public class Pathing : SyncObject
 	{
 		GetEventAPI().UpdateMoveVelocity(this, mMoveVelocity, transform.localPosition);
 
-		PhysicObject[] tempObjects = gameObject.GetComponents<PhysicObject>();
+		/*PhysicObject[] tempObjects = gameObject.GetComponents<PhysicObject>();
 
 		for (int i = 0; i < tempObjects.Length; i++)
 		{
 			tempObjects[i].DidSyncData();
-		}
+		}*/
 	}
 }

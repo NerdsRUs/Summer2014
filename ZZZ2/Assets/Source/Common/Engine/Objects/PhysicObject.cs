@@ -71,6 +71,11 @@ public class PhysicObject : SyncObject
 
 	void DoUpdate(Vector3 position, Vector3 scale, Vector3 rotation, Vector3 velocity, float angularVelocity)
 	{
+		if (IsServer())
+		{
+			Debug.Log("Update position");
+		}
+
 		transform.localPosition = position;
 		transform.localScale = scale;
 

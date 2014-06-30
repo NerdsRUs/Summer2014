@@ -23,7 +23,7 @@ public class SyncObject : EngineObject
 		return FORCED_SYNC_RATE;
 	}
 
-	void LateUpdate()
+	virtual protected void LateUpdate()
 	{
 		if (IsOnHost())
 		{
