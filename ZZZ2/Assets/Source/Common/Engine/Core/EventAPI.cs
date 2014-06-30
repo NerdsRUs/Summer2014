@@ -6,7 +6,7 @@ public class EventAPI : EventAPIBase
 	//Can use objectID(int), or the actual Class interchangably
 	public void SetUserVelocity(Pathing objectID, Vector3 newVelocity)
 	{
-		NewEventFromObject(objectID, "SetUserVelocity", newVelocity);
+		NewObjectEventLocalOnly(objectID, "SetUserVelocity", newVelocity);
 
 		//Use the above command to create events from functions defined in other objects (must be of type EngineObject) - the type will be detected at runtime
 		//Further, this function will automatically convert objectIDs to the object type required by the function (again, must be of type EngineObject to convert)
@@ -22,12 +22,14 @@ public class EventAPI : EventAPIBase
 		mCurrentInstance.GetObject<Pathing>(objectID).SetUserVelocity(newVelocity);
 	}*/
 
+	public void UpdateMoveVelocity(Pathing objectID, Vector3 newVelocity, Vector3 position)
+	{
+		NewObjectEventAllRemote(objectID, "UpdateUserVelocity", newVelocity, position);
+	}	
+
 	public void UpdatePhysics(PhysicObject objectID, Vector3 position, Vector3 scale, Vector3 rotation, Vector3 velocity, float angularVelocity)
 	{
-		if (mCurrentInstance.IsServer())
-		{
-			NewEventFromObject(objectID, "DoUpdate", position, scale, rotation, velocity, angularVelocity);
-		}
+		NewObjectEvent(objectID, "DoUpdate", position, scale, rotation, velocity, angularVelocity);
 	}
 
 	//Test junk

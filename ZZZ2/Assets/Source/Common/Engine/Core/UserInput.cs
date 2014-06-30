@@ -27,7 +27,7 @@ public class UserInput : MonoBehaviour
 		} 
 		else 
 		{
-			mManager.GetEventAPI().SetUserVelocity(mManager.GetObjectByTag<Pathing>("LocalPlayer"), movement);
+			mManager.GetEventAPI().SetUserVelocity(mManager.GetObjectByTag<Pathing>("LocalPlayer"), movement * 10);
 
 			mCurrentVelocity = movement;
 		}

@@ -2030,6 +2030,23 @@ public class Common
 
 		return mServer;
 	}
+
+	public static bool TypeInheritsFrom(Type parentType, Type baseType)
+	{
+		Type currentType = parentType;
+
+		while (currentType != null)
+		{
+			if (currentType.BaseType == baseType)
+			{
+				return true;
+			}
+
+			currentType = currentType.BaseType;
+		}
+
+		return false;
+	}
 }
 
 

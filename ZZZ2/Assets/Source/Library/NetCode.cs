@@ -9,16 +9,15 @@ using System.Reflection;
 using System.Text;
 using System.Runtime.InteropServices;
 
-public class NetCode : MonoBehaviour
+public class NetCode
 {
 	const int MAX_PACKET_LENGTH = 1024;
 
 	public static bool DEBUG = false;
 
-	public string terminalScriptName = "";
-
 	string mTerminalRPCName = "";
-	NetCode mTerminalScript;
+	Type mTerminalScript;
+	NetworkView mNetworkView;
 
 	protected bool mProcessPackets = true;
 	List<Packet> mPacketQueue = new List<Packet>();
@@ -38,7 +37,7 @@ public class NetCode : MonoBehaviour
 		{
 			try
 			{
-				processPacket(mPacketQueue[0].mName, mPacketQueue[0].mData, mPacketQueue[0].mID);
+				ProcessPacket(mPacketQueue[0].mName, mPacketQueue[0].mData, mPacketQueue[0].mID);
 			}
 			catch (System.Reflection.TargetInvocationException e)
 			{
@@ -50,33 +49,36 @@ public class NetCode : MonoBehaviour
 		}
 	}
 
-    public bool packetsPaused()
+    public bool PacketsPaused()
     {
         return !mProcessPackets;
     }
 
-	public void pausePackets()
+	public void PausePackets()
 	{
 		mProcessPackets = false;
 	}
 
-	public void resumePackets()
+	public void ResumePackets()
 	{
 		mProcessPackets = true;
 	}
 
-	void init()
+	public void Init(string terminalScriptName, NetworkView networkView)
 	{
-		mTerminalScript = (NetCode)GetComponent(terminalScriptName);
+		mTerminalScript = Type.GetType(terminalScriptName);
 
 		mTerminalRPCName = terminalScriptName + "RPC";
+
+		mNetworkView = networkView;
 	}
 
-	protected void doRPC(string name, NetworkPlayer player, params object[] args)
+	protected void DoRPC(string name, NetworkPlayer player, params object[] args)
 	{
 		if (mTerminalScript == null)
 		{
-			init();
+			Debug.Log("NetCode has not been initialized");
+			return;
 		}
 
 		bool hasConnection = false;
@@ -92,7 +94,7 @@ public class NetCode : MonoBehaviour
 		{
 			try
 			{
-				networkView.RPC(mTerminalRPCName, player, name, mServerPacketID, getRPCBytes(name, args));
+				mNetworkView.RPC(mTerminalRPCName, player, name, mServerPacketID, GetRPCBytes(name, args));
 			}
 			catch (Exception e)
 			{
@@ -105,14 +107,15 @@ public class NetCode : MonoBehaviour
 		}
 	}
 
-	protected void doRPC(string name, RPCMode mode, params object[] args)
+	protected void DoRPC(string name, RPCMode mode, params object[] args)
 	{
 		if (mTerminalScript == null)
 		{
-			init();
+			Debug.Log("NetCode has not been initialized");
+			return;
 		}
 
-		networkView.RPC(mTerminalRPCName, mode, name, mServerPacketID, getRPCBytes(name, args));
+		mNetworkView.RPC(mTerminalRPCName, mode, name, mServerPacketID, GetRPCBytes(name, args));
 
 		/*if (DEBUG)
 		{
@@ -130,7 +133,7 @@ public class NetCode : MonoBehaviour
 		}*/
 	}
 
-	public byte[] getRPCBytes(string RPCname, params object[] objects)
+	public byte[] GetRPCBytes(string RPCname, params object[] objects)
 	{
 		MethodInfo tempMethod = mTerminalScript.GetType().GetMethod(RPCname, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
@@ -194,7 +197,7 @@ public class NetCode : MonoBehaviour
 
 
 
-	protected void dynamicRPC(string name, int ID, byte[] data)
+	protected void DynamicRPC(string name, int ID, byte[] data)
 	{
 		Packet newPacket;
 		newPacket.mName = name;
@@ -204,7 +207,7 @@ public class NetCode : MonoBehaviour
 		mPacketQueue.Add(newPacket);
 	}
 
-	void processPacket(string name, byte[] data, int ID = 0)
+	void ProcessPacket(string name, byte[] data, int ID = 0)
 	{
 		int size;
 		object tempObject = null;

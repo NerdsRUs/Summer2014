@@ -6,10 +6,14 @@ using System;
 public class EventAPIBase 
 {
 	protected EngineManager mCurrentInstance;
+	protected NetCode mNetCode;
 
 	public void Init(EngineManager instance)
 	{
 		mCurrentInstance = instance;
+
+		mNetCode = new NetCode();
+		mNetCode.Init("EventAPI", instance.GetComponent<NetworkView>());
 	}
 
 	protected void DoObjectFunction(int objectID, string functionName, params object[] parameters)
@@ -40,7 +44,7 @@ public class EventAPIBase
 
 		for (int i = 0; i < tempInfo.Length; i++)
 		{
-			if (tempInfo[i].ParameterType.BaseType == typeof(EngineObject) && parameters[i].GetType() == typeof(int))
+			if (Common.TypeInheritsFrom(tempInfo[i].ParameterType, typeof(EngineObject)) && parameters[i].GetType() == typeof(int))
 			{
 				parameters[i] = mCurrentInstance.GetObject<EngineObject>((int)parameters[i]);
 			}
@@ -52,14 +56,28 @@ public class EventAPIBase
 		}
 		catch (Exception e)
 		{
-			Debug.LogError("Event object function had error: " + e.InnerException.Message + "/n" + e.InnerException.StackTrace);
+			Debug.LogError("Event object function had error: " + e.Message + "/n" + e.StackTrace);
 		}
 	}
 
 	public string GetCommandString(params object[] parameters)
 	{
 		string functionName = (string)parameters[1];
-		int objectID = (int)parameters[0];
+
+		int objectID;
+		
+		if (parameters[0].GetType() == typeof(int))
+		{
+			objectID  = (int)parameters[0];
+		}
+		else if (Common.TypeInheritsFrom(parameters[0].GetType(), typeof(EngineObject)))
+		{
+			objectID = ((EngineObject)parameters[0]).GetObjectID();
+		}
+		else
+		{
+			return "Event object function's call object ID is invalid: " + functionName + " " + parameters[0].GetType();
+		}
 
 		EngineObject callObject = mCurrentInstance.GetObject<EngineObject>(objectID);
 
@@ -106,41 +124,81 @@ public class EventAPIBase
 		return command;
 	}
 
-	protected void NewEventFromObject(int objectID, string functionName, params object[] paramaters)
+	//Adds event to server and clients
+	protected void NewObjectEvent(int objectID, string functionName, params object[] parameters)
 	{
-		NewEvent("DoObjectFunction", objectID, functionName, paramaters);
+		NewEvent("DoObjectFunction", objectID, functionName, parameters);
 	}
 
-	protected void NewEventFromObject(EngineObject objectID, string functionName, params object[] paramaters)
+	protected void NewObjectEvent(EngineObject objectID, string functionName, params object[] parameters)
 	{
-		NewEvent("DoObjectFunction", objectID, functionName, paramaters);
+		NewEvent("DoObjectFunction", objectID, functionName, parameters);
 	}
 
-	protected void NewEvent(string functionName, params object[] paramaters)
+	protected void NewEvent(string functionName, params object[] parameters)
 	{
-		mCurrentInstance.AddEvent(functionName, paramaters);
+		mCurrentInstance.AddEvent(functionName, parameters);
+
+		//Send to all other clients
 
 		if (mCurrentInstance.IsServer())
 		{
-			NewEventOnClient(0, functionName, paramaters);
+			NewEventAllRemote(functionName, parameters);
 		}
 	}
 
 
-	protected void NewEventOnClientFromObject(int clientIdentifer, int objectID, string functionName, params object[] paramaters)
+	//Adds event to server only
+	protected void NewObjectEventLocalOnly(int objectID, string functionName, params object[] parameters)
 	{
-		NewEventOnClient(clientIdentifer, "DoObjectFunction", objectID, functionName, paramaters);
+		NewEventLocalOnly("DoObjectFunction", objectID, functionName, parameters);
 	}
 
-	protected void NewEventOnClientFromObject(int clientIdentifer, EngineObject objectID, string functionName, params object[] paramaters)
+	protected void NewObjectEventLocalOnly(EngineObject objectID, string functionName, params object[] parameters)
 	{
-		NewEventOnClient(clientIdentifer, "DoObjectFunction", objectID, functionName, paramaters);
+		NewEventLocalOnly("DoObjectFunction", objectID, functionName, parameters);
 	}
 
-	protected void NewEventOnClient(int clientIdentifer, string functionName, params object[] paramaters)
+	protected void NewEventLocalOnly(string functionName, params object[] parameters)
+	{
+		mCurrentInstance.AddEvent(functionName, parameters);		
+	}
+
+
+	//Adds event to all clients
+	protected void NewObjectEventAllRemote(int objectID, string functionName, params object[] parameters)
+	{
+		NewEventAllRemote("DoObjectFunction", objectID, functionName, parameters);
+	}
+
+	protected void NewObjectEventAllRemote(EngineObject objectID, string functionName, params object[] parameters)
+	{
+		NewEventAllRemote("DoObjectFunction", objectID, functionName, parameters);
+	}
+
+	protected void NewEventAllRemote(string functionName, params object[] parameters)
+	{
+		//Send to all other clients
+
+		NewEventRemote(0, functionName, parameters);
+	}
+
+
+	//Adds event to specified client
+	protected void NewObjectEventRemote(int remoteIdentifer, int objectID, string functionName, params object[] parameters)
+	{
+		NewEventRemote(remoteIdentifer, "DoObjectFunction", objectID, functionName, parameters);
+	}
+
+	protected void NewObjectEventRemote(int remoteIdentifer, EngineObject objectID, string functionName, params object[] parameters)
+	{
+		NewEventRemote(remoteIdentifer, "DoObjectFunction", objectID, functionName, parameters);
+	}
+
+	protected void NewEventRemote(int remoteIdentifer, string functionName, params object[] parameters)
 	{
 		//Send event to client
 
-		Common.getClientManager().GetEventAPI().NewEvent(functionName, paramaters);
+		Common.getClientManager().GetEventAPI().NewEvent(functionName, parameters);
 	}	
 }

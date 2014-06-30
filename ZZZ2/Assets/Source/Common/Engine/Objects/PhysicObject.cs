@@ -3,54 +3,26 @@ using System.Collections;
 
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class PhysicObject : EngineObject 
+public class PhysicObject : SyncObject 
 {
-	const float DEFAULT_SYNC_RATE = 0.5f;
-	const float COLLISION_SYNC_RATE = 0.1f;
-
-	double mNextSyncTime = 0;
-	double mLastSyncTime = 0;
-
-	void LateUpdate()
-	{
-		if (GetCurrentTime() >= mNextSyncTime)
-		{
-			SyncData();
-
-			mLastSyncTime = GetCurrentTime();
-			mNextSyncTime = mLastSyncTime + DEFAULT_SYNC_RATE;			
-		}
-	}
-
 	void OnCollisionEnter2D()
 	{
-		HadCollision();
+		ForceUpdate();
 	}
 
 	void OnCollisionExit2D()
 	{
-		HadCollision();
+		ForceUpdate();
 	}
 
-	void HadCollision()
+	protected override bool CheckIsAtRest()
 	{
-		//Force atleast COLLISION_SYNC_RATE seconds between updates
-		if (GetCurrentTime() >= mLastSyncTime + COLLISION_SYNC_RATE)
-		{
-			SyncData();
-		}
-		else
-		{
-			mNextSyncTime = mLastSyncTime + COLLISION_SYNC_RATE;
-		}
+		return false;// rigidbody2D.velocity.sqrMagnitude == 0 && Mathf.Abs(rigidbody2D.angularVelocity) == 0;
 	}
 
-	void SyncData()
+	override protected void DoSyncData()
 	{
-		if (rigidbody2D.velocity.sqrMagnitude > 0 || rigidbody2D.angularVelocity > 0)
-		{
-			GetEventAPI().UpdatePhysics(this, transform.localPosition, transform.localScale, transform.localRotation.eulerAngles, rigidbody2D.velocity, rigidbody2D.angularVelocity);
-		}
+		GetEventAPI().UpdatePhysics(this, transform.localPosition, transform.localScale, transform.localRotation.eulerAngles, rigidbody2D.velocity, rigidbody2D.angularVelocity);
 	}
 
 	void DoUpdate(Vector3 position, Vector3 scale, Vector3 rotation, Vector3 velocity, float angularVelocity)

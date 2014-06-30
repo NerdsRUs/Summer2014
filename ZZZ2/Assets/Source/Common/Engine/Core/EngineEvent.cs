@@ -24,7 +24,7 @@ public class EngineEvent
 
 		for (int i = 0; i < mParameters.Length; i++)
 		{
-			if (mParameters[i].GetType().BaseType == typeof(EngineObject))
+			if (Common.TypeInheritsFrom(mParameters[i].GetType(), typeof(EngineObject)))
 			{
 				mParameters[i] = ((EngineObject)mParameters[i]).GetObjectID();
 			}
@@ -37,7 +37,7 @@ public class EngineEvent
 
 		if (tempMethod == null)
 		{
-			Debug.LogError("Event function does not exist: '" + mFunctionName + "'");
+			Debug.LogError("Event(" + mFunctionName + ") function does not exist: '" + mFunctionName + "'");
 			return;
 		}
 
@@ -45,13 +45,13 @@ public class EngineEvent
 
 		if (mParameters.Length != tempInfo.Length)
 		{
-			Debug.LogError("Event function parameter coutns don't match: '" + mFunctionName + "'" + tempInfo.Length + " got " + mParameters.Length);
+			Debug.LogError("Event(" + mFunctionName + ") function parameter coutns don't match: '" + mFunctionName + "'" + tempInfo.Length + " got " + mParameters.Length);
 			return;
 		}
 
 		for (int i = 0; i < tempInfo.Length; i++)
 		{
-			if (tempInfo[i].ParameterType.BaseType == typeof(EngineObject) && mParameters[i].GetType() == typeof(int))
+			if (Common.TypeInheritsFrom(tempInfo[i].ParameterType, typeof(EngineObject)) && mParameters[i].GetType() == typeof(int))
 			{
 				mParameters[i] = mEngineManager.GetObject<EngineObject>((int)mParameters[i]);
 			}
@@ -65,7 +65,7 @@ public class EngineEvent
 		}
 		catch (Exception e)
 		{
-			Debug.LogError("Event had error: " + e.InnerException.Message + "/n" + e.InnerException.StackTrace);
+			Debug.LogError("Event(" + mFunctionName + ") had error: " + e.Message + "/n" + e.StackTrace);
 		}
 
 		mExecutingEvent = false;

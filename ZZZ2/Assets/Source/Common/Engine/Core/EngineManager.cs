@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(NetworkView))]
 public class EngineManager : EngineObject 
 {
 	static double UPDATE_TICK = 0.1f;
