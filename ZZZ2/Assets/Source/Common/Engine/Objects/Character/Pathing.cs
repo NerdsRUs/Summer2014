@@ -35,14 +35,14 @@ public class Pathing : SyncObject
 
 	public void UpdateUserVelocity(Vector3 newVelocity, Vector3 position)
 	{
+		if (mQueueTime != 0)
+		{
+			DoQueuedUpdate();
+		}
+
 		//Delay all movement by the lag time (Don't delay stop commands
 		if (mMoveVelocity.sqrMagnitude != 0)
 		{
-			if (mQueueTime != 0)
-			{
-				DoQueuedUpdate();
-			}
-
 			mMoveVelocity = newVelocity;
 
 			transform.localPosition = position;
