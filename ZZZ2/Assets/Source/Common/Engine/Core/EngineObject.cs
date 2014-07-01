@@ -219,11 +219,11 @@ public class EngineObject : MonoBehaviour
 		return mInstance;
 	}
 
-	public void AddEvent(string functionName, params object[] parameters)
+	public void AddEvent(double time, string functionName, params object[] parameters)
 	{
 		EngineEvent newEvent = new EngineEvent();
 
-		newEvent.Init(mInstance, functionName, Time.time, transform.position, parameters);
+		newEvent.Init(mInstance, functionName, time, transform.position, parameters);
 
 		mInstance.MakeEvent(newEvent);
 	}

@@ -45,7 +45,7 @@ public class EngineEvent
 		}
 	}
 
-	public void Init(EngineManager instance, string eventName, float time, Vector3 position, params object[] parameters)
+	public void Init(EngineManager instance, string eventName, double time, Vector3 position, params object[] parameters)
 	{
 		mTime = time;
 		mPosition = position;

@@ -236,8 +236,13 @@ public class EventAPIBase : NetCode
 
 	protected void NewEvent(string functionName, params object[] parameters)
 	{
+		NewEvent(mCurrentInstance.GetEngineTime(), functionName, parameters);
+	}
+
+	protected void NewEvent(double time, string functionName, params object[] parameters)
+	{
 		NormalizeParameters(ref parameters);
-		mCurrentInstance.AddEvent(functionName, parameters);
+		mCurrentInstance.AddEvent(time, functionName, parameters);
 
 		//Send to all other clients
 
@@ -261,13 +266,18 @@ public class EventAPIBase : NetCode
 
 	protected void NewEventLocalOnly(string functionName, params object[] parameters)
 	{
+		NewEventLocalOnly(mCurrentInstance.GetEngineTime(), functionName, parameters);
+	}
+
+	protected void NewEventLocalOnly(double time, string functionName, params object[] parameters)
+	{
 		NormalizeParameters(ref parameters);
-		mCurrentInstance.AddEvent(functionName, parameters);		
+		mCurrentInstance.AddEvent(time, functionName, parameters);		
 	}
 
 
 
-	protected void NewEventPacket(string functionName, params byte[] data)
+	protected void NewEventPacket(double time, string functionName, params byte[] data)
 	{
 		//Network version sends data as a byte array, need to parse it based on the sub function
 		MethodInfo tempMethod = this.GetType().GetMethod(functionName, BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
@@ -317,7 +327,7 @@ public class EventAPIBase : NetCode
 		}*/
 
 		NormalizeParameters(ref tempObjects);
-		NewEventLocalOnly(functionName, tempObjects);
+		NewEventLocalOnly(time, functionName, tempObjects);
 	}
 
 
@@ -334,8 +344,13 @@ public class EventAPIBase : NetCode
 
 	protected void NewEventAllRemote(string functionName, params object[] parameters)
 	{
+		NewEventAllRemote(mCurrentInstance.GetEngineTime(), functionName, parameters);
+	}
+
+	protected void NewEventAllRemote(double time, string functionName, params object[] parameters)
+	{
 		//Send to all other clients
-		NewEventRemote(0, functionName, parameters);
+		NewEventRemote(0, time, functionName, parameters);
 
 		if (EngineManager.mLocalManagers.Count > 1)
 		{
@@ -343,7 +358,7 @@ public class EventAPIBase : NetCode
 			{
 				if (EngineManager.mLocalManagers[i] != mCurrentInstance)
 				{
-					EngineManager.mLocalManagers[i].GetEventAPI().NewEventLocalOnly(functionName, parameters);
+					EngineManager.mLocalManagers[i].GetEventAPI().NewEventLocalOnly(time, functionName, parameters);
 				}
 			}
 		}
@@ -363,13 +378,18 @@ public class EventAPIBase : NetCode
 
 	protected void NewEventRemote(int remoteIdentifer, string functionName, params object[] parameters)
 	{
+		NewEventRemote(remoteIdentifer, mCurrentInstance.GetEngineTime(), functionName, parameters);
+	}
+
+	protected void NewEventRemote(int remoteIdentifer, double time, string functionName, params object[] parameters)
+	{
 		//Send event to client
 		NormalizeParameters(ref parameters);
 
-		MakeRPC(RPCMode.Others, functionName, parameters);
+		MakeRPC(RPCMode.Others, time, functionName, parameters);
 	}
 
-	void MakeRPC(RPCMode mode, string functionName, params object[] parameters)
+	void MakeRPC(RPCMode mode, double time, string functionName, params object[] parameters)
 	{
 		if (mOldTerminal != null)
 		{
@@ -392,7 +412,7 @@ public class EventAPIBase : NetCode
 					Debug.Log(i + " -> " + parameters[i]);
 				}
 			}*/
-			DoRPC("NewEventPacket", RPCMode.Others, functionName, GetRPCBytes(functionName, parameters));
+			DoRPC("NewEventPacket", RPCMode.Others, time, functionName, GetRPCBytes(functionName, parameters));
 		}
 	}
 }

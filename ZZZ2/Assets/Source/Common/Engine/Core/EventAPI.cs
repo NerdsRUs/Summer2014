@@ -24,7 +24,14 @@ public class EventAPI : EventAPIBase
 
 	public void UpdateMoveVelocity(Pathing objectID, Vector3 newVelocity, Vector3 position)
 	{
-		NewObjectEventAllRemote(objectID, "UpdateUserVelocity", newVelocity, position);
+		if (newVelocity.sqrMagnitude == 0)
+		{
+			NewEventAllRemote(mCurrentInstance.GetEngineTime() - EngineManager.CLIENT_DELAY_TIME, "DoObjectFunction", objectID, "UpdateUserVelocity", newVelocity, position);
+		}
+		else
+		{
+			NewObjectEventAllRemote(objectID, "UpdateUserVelocity", newVelocity, position);
+		}
 	}	
 
 	public void UpdatePhysics(PhysicObject objectID, Vector3 position, Vector3 scale, Vector3 rotation, Vector3 velocity, float angularVelocity)

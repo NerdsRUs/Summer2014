@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class EngineManager : EngineObject 
 {
+	public static double CLIENT_DELAY_TIME = 0.1f;
 	static double UPDATE_TICK = 0.1f;
 
 	Pool<EngineObject> mGameObjects = new Pool<EngineObject>();
@@ -113,7 +114,7 @@ public class EngineManager : EngineObject
 
 	void DoEvents()
 	{
-		while (mCurrentEvents.Count > 0)
+		while (mCurrentEvents.Count > 0 && GetEngineTime() >= mCurrentEvents[0].GetTime())
 		{
 			if (mEventDebug != null)
 			{
@@ -128,6 +129,11 @@ public class EngineManager : EngineObject
 
 	public double GetEngineTime()
 	{
+		if (!IsServer())
+		{
+			return Time.time - CLIENT_DELAY_TIME;
+		}
+
 		return Time.time;
 	}
 

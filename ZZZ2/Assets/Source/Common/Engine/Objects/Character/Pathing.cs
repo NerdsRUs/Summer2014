@@ -4,9 +4,6 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class Pathing : SyncObject 
 {
-	//Should be about latency x2?
-	static float LAG_TIME = 0.1f;
-
 	Vector3 mMoveVelocity;
 	Vector2 mLastVelocity;
 
@@ -35,33 +32,18 @@ public class Pathing : SyncObject
 
 	public void UpdateUserVelocity(Vector3 newVelocity, Vector3 position)
 	{
-		if (mQueueTime != 0)
-		{
-			DoQueuedUpdate();
-		}
-
 		//Delay all movement by the lag time (Don't delay stop commands
-		if (mMoveVelocity.sqrMagnitude != 0)
+		mMoveVelocity = newVelocity;
+
+		if (IsServer())
 		{
-			mMoveVelocity = newVelocity;
-
-			if (IsServer())
-			{
-				Debug.Log("Update position");
-			}
-
-			transform.localPosition = position;
+			Debug.Log("Update position");
 		}
-		else
-		{
-			mQueuedVelocity = newVelocity;
-			mQueuedPosition = position;
 
-			mQueueTime = GetCurrentTime() + LAG_TIME;
-		}
+		transform.localPosition = position;
 	}
 
-	void DoQueuedUpdate()
+	/*void DoQueuedUpdate()
 	{
 		mQueueTime = 0;
 
@@ -73,15 +55,15 @@ public class Pathing : SyncObject
 		}
 
 		transform.localPosition = mQueuedPosition;
-	}
+	}*/
 
-	void Update()
+	/*void Update()
 	{
 		if (mQueueTime != 0 && GetCurrentTime() >= mQueueTime)
 		{
 			DoQueuedUpdate();			
 		}
-	}
+	}*/
 
 	override protected void LateUpdate()
 	{
@@ -103,11 +85,11 @@ public class Pathing : SyncObject
 	{
 		GetEventAPI().UpdateMoveVelocity(this, mMoveVelocity, transform.localPosition);
 
-		/*PhysicObject[] tempObjects = gameObject.GetComponents<PhysicObject>();
+		PhysicObject[] tempObjects = gameObject.GetComponents<PhysicObject>();
 
 		for (int i = 0; i < tempObjects.Length; i++)
 		{
 			tempObjects[i].DidSyncData();
-		}*/
+		}
 	}
 }
