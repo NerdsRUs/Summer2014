@@ -14,6 +14,37 @@ public class EngineEvent
 
 	static bool mExecutingEvent;
 
+	public static void ConvertParameters(EngineManager manager, ParameterInfo[] parameterInfo, ref object[] parameters)
+	{
+		for (int i = 0; i < parameterInfo.Length; i++)
+		{
+			if (Common.TypeInheritsFrom(parameterInfo[i].ParameterType, typeof(EngineObject)) && parameters[i].GetType() == typeof(int))
+			{
+				parameters[i] = manager.GetObject<EngineObject>((int)parameters[i]);
+			}
+
+			if (parameterInfo[i].ParameterType == typeof(object[]))
+			{
+				object[] tempObjects = new object[parameters.Length - i];
+
+				for (int j = 0; j < tempObjects.Length; j++)
+				{
+					tempObjects[j] = parameters[i + j];
+				}
+
+				parameters[i] = tempObjects;
+
+				object[] newParameters = new object[i + 1];
+				for (int j = 0; j < newParameters.Length; j++)
+				{
+					newParameters[j] = parameters[j];
+				}
+
+				parameters = newParameters;
+			}
+		}
+	}
+
 	public void Init(EngineManager instance, string eventName, float time, Vector3 position, params object[] parameters)
 	{
 		mTime = time;
@@ -21,19 +52,11 @@ public class EngineEvent
 		mFunctionName = eventName;
 		mParameters = parameters;
 		mEngineManager = instance;
-
-		for (int i = 0; i < mParameters.Length; i++)
-		{
-			if (Common.TypeInheritsFrom(mParameters[i].GetType(), typeof(EngineObject)))
-			{
-				mParameters[i] = ((EngineObject)mParameters[i]).GetObjectID();
-			}
-		}
 	}
 
 	public void Execute()
 	{
-		MethodInfo tempMethod = typeof(EventAPI).GetMethod(mFunctionName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
+		MethodInfo tempMethod = typeof(EventAPI).GetMethod(mFunctionName, BindingFlags.OptionalParamBinding | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
 		if (tempMethod == null)
 		{
@@ -42,20 +65,23 @@ public class EngineEvent
 		}
 
 		ParameterInfo[] tempInfo = tempMethod.GetParameters();
+		bool isSubFunction = false;
 
-		if (mParameters.Length != tempInfo.Length)
+		for (int i = 0; i < tempInfo.Length; i++)
+		{
+			if (tempInfo[i].ParameterType == typeof(object[]))
+			{
+				isSubFunction = true;
+			}
+		}
+
+		if (!isSubFunction && mParameters.Length != tempInfo.Length)
 		{
 			Debug.LogError("Event(" + mFunctionName + ") function parameter coutns don't match: '" + mFunctionName + "'" + tempInfo.Length + " got " + mParameters.Length);
 			return;
 		}
 
-		for (int i = 0; i < tempInfo.Length; i++)
-		{
-			if (Common.TypeInheritsFrom(tempInfo[i].ParameterType, typeof(EngineObject)) && mParameters[i].GetType() == typeof(int))
-			{
-				mParameters[i] = mEngineManager.GetObject<EngineObject>((int)mParameters[i]);
-			}
-		}
+		ConvertParameters(mEngineManager, tempInfo, ref mParameters);
 
 		mExecutingEvent = true;
 

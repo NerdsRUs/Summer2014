@@ -11,7 +11,7 @@ using System.Collections.Generic;
 /// </summary>
 
 [ExecuteInEditMode]
-[AddComponentMenu("NGUI/Interaction/NGUI Scroll Bar")]
+[AddComponentMenu("NGUI/Interaction\nGUI Scroll Bar")]
 public class UIScrollBar : UISlider
 {
 	enum Direction

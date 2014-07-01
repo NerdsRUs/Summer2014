@@ -32,7 +32,7 @@ using System.Collections.Generic;
 /// </summary>
 
 [ExecuteInEditMode]
-[AddComponentMenu("NGUI/UI/NGUI Event System (UICamera)")]
+[AddComponentMenu("NGUI/UI\nGUI Event System (UICamera)")]
 [RequireComponent(typeof(Camera))]
 public class UICamera : MonoBehaviour
 {

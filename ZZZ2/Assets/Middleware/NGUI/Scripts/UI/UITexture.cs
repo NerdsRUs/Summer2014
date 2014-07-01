@@ -13,7 +13,7 @@ using System.Collections.Generic;
 /// </summary>
 
 [ExecuteInEditMode]
-[AddComponentMenu("NGUI/UI/NGUI Texture")]
+[AddComponentMenu("NGUI/UI\nGUI Texture")]
 public class UITexture : UIWidget
 {
 	public enum Flip

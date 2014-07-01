@@ -224,7 +224,12 @@
      <Compile Include="Assets\Source\Common\Engine\Core\EngineObject.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\EventAPI.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\EventAPIBase.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\Networking\ClientTerminal.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\Networking\NetcodeSender.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\Networking\NetcodeTerminal.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\Networking\NetworkClient.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\Networking\NetworkServer.cs" />
+     <Compile Include="Assets\Source\Common\Engine\Core\Networking\ServerTerminal.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\NewableMonoBehaviour.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\SampleObject.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\UserInput.cs" />

@@ -9,14 +9,19 @@ using System.Reflection;
 using System.Text;
 using System.Runtime.InteropServices;
 
-public class NetCode
+public class NetCode : MonoBehaviour
 {
 	const int MAX_PACKET_LENGTH = 1024;
 
 	public static bool DEBUG = false;
 
-	string mTerminalRPCName = "";
 	Type mTerminalScript;
+	object mTerminalObject;
+
+	Type mCallScript;
+	object mCallObject;
+
+	string mParserFunction;
 	NetworkView mNetworkView;
 
 	protected bool mProcessPackets = true;
@@ -64,18 +69,28 @@ public class NetCode
 		mProcessPackets = true;
 	}
 
-	public void Init(string terminalScriptName, NetworkView networkView)
+	public void Init(object callScript, object terminalScript, string parserFunction, NetworkView networkView)
 	{
-		mTerminalScript = Type.GetType(terminalScriptName);
+		if (callScript != null)
+		{
+			mCallScript = callScript.GetType();
+			mCallObject = callScript;
+		}
 
-		mTerminalRPCName = terminalScriptName + "RPC";
+		if (terminalScript != null)
+		{
+			mTerminalScript = terminalScript.GetType();
+			mTerminalObject = terminalScript;
+		}
+
+		mParserFunction = parserFunction;
 
 		mNetworkView = networkView;
 	}
 
 	protected void DoRPC(string name, NetworkPlayer player, params object[] args)
 	{
-		if (mTerminalScript == null)
+		if (mTerminalScript == null || mCallScript == null)
 		{
 			Debug.Log("NetCode has not been initialized");
 			return;
@@ -94,7 +109,7 @@ public class NetCode
 		{
 			try
 			{
-				mNetworkView.RPC(mTerminalRPCName, player, name, mServerPacketID, GetRPCBytes(name, args));
+				mNetworkView.RPC(mParserFunction, player, name, mServerPacketID, GetRPCBytes(name, args));
 			}
 			catch (Exception e)
 			{
@@ -109,13 +124,16 @@ public class NetCode
 
 	protected void DoRPC(string name, RPCMode mode, params object[] args)
 	{
-		if (mTerminalScript == null)
+		if (mTerminalScript == null || mCallScript == null)
 		{
 			Debug.Log("NetCode has not been initialized");
 			return;
 		}
 
-		mNetworkView.RPC(mTerminalRPCName, mode, name, mServerPacketID, GetRPCBytes(name, args));
+		if (mNetworkView != null)
+		{
+			mNetworkView.RPC(mParserFunction, mode, name, mServerPacketID, GetRPCBytes(name, args));
+		}
 
 		/*if (DEBUG)
 		{
@@ -135,17 +153,42 @@ public class NetCode
 
 	public byte[] GetRPCBytes(string RPCname, params object[] objects)
 	{
-		MethodInfo tempMethod = mTerminalScript.GetType().GetMethod(RPCname, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+		MethodInfo tempMethod = mCallScript.GetMethod(RPCname, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
 		if (tempMethod == null)
 		{
-			Debug.LogError("RPC function does not exist: '" + RPCname + "' in class " + mTerminalScript.GetType());
+			Debug.LogError("RPC function does not exist: '" + RPCname + "' in class " + mCallScript);
 			return null;
 		}
 
 		ParameterInfo[] tempInfo = tempMethod.GetParameters();
+		bool isSubFunction = false;
 
-		if (objects.Length != tempInfo.Length)
+		for (int i = 0; i < tempInfo.Length; i++)
+		{
+			if (tempInfo[i].ParameterType == typeof(object[]))
+			{
+				isSubFunction = true;
+			}
+		}
+
+		Debug.Log(objects.Length + " " + objects[1].GetType());
+		if (objects.Length == 2 && objects[1].GetType() == typeof(object[]))
+		{
+			object[] nestedArray = (object[])objects[1];
+			object[] newObjects = new object[nestedArray.Length + 1];
+
+			newObjects[0] = objects[0];
+
+			for (int i = 1; i < newObjects.Length; i++)
+			{
+				newObjects[i] = nestedArray[i - 1];
+			}
+
+			objects = newObjects;
+		}
+
+		if (!isSubFunction && objects.Length != tempInfo.Length)
 		{
 			Debug.LogError("RPC function '" + RPCname + "' parameter counts don't match. Expected " + tempInfo.Length + " got " + objects.Length);
 			return null;
@@ -155,7 +198,7 @@ public class NetCode
 
 		for (int i = 0; i < tempInfo.Length; i++)
 		{
-			if (tempInfo[i].ParameterType != objects[i].GetType())
+			if (tempInfo[i].ParameterType != objects[i].GetType() && tempInfo[i].ParameterType != typeof(object[]))
 			{
 				Debug.LogError("RPC function '" + RPCname + "' parameter " + (i + 1) + " is the wrong type. Expected " + tempInfo[i].ParameterType + " got " + objects[i].GetType());
 				return null;
@@ -197,7 +240,7 @@ public class NetCode
 
 
 
-	protected void DynamicRPC(string name, int ID, byte[] data)
+	public void DynamicRPC(string name, int ID, byte[] data)
 	{
 		Packet newPacket;
 		newPacket.mName = name;
@@ -209,18 +252,7 @@ public class NetCode
 
 	void ProcessPacket(string name, byte[] data, int ID = 0)
 	{
-		int size;
-		object tempObject = null;
-		int currentOffset = 0;
-
-		/*if (!FromByteArray(typeof(string), data, 0, out size, ref tempObject))
-		{
-			SQDebug.log("Malformed RPC call: " + name);
-			return;
-		}*/
-
-		string RPCname = name;
-		MethodInfo tempMethod = this.GetType().GetMethod(RPCname, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+		MethodInfo tempMethod = mCallScript.GetMethod(name, BindingFlags.FlattenHierarchy | BindingFlags.OptionalParamBinding | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
 		if (tempMethod == null)
 		{
@@ -228,24 +260,7 @@ public class NetCode
 			return;
 		}
 
-		ParameterInfo[] tempInfo = tempMethod.GetParameters();
-
-		object[] parameters = new object[tempInfo.Length];
-
-		for (int i = 0; i < tempInfo.Length; i++)
-		{
-			if (FromByteArray(tempInfo[i].ParameterType, data, currentOffset, out size, ref tempObject))
-			{
-				parameters[i] = tempObject;
-			}
-			else
-			{
-				Debug.LogError("RPC function '" + name + "' was unable to convert parameter: " + (i + 1));
-				return;
-			}
-
-			currentOffset += size;
-		}
+		object[] parameters = GetParameterListFromBytes(tempMethod, data);
 
 		/*if (DEBUG)
 		{
@@ -260,7 +275,37 @@ public class NetCode
 			}
 		}*/
 
-		tempMethod.Invoke(this, parameters);
+		tempMethod.Invoke(mCallObject, parameters);
+	}
+
+	public object[] GetParameterListFromBytes(MethodInfo method, byte[] data)
+	{
+		int size;
+		object tempObject = null;
+		int currentOffset = 0;
+
+		MethodInfo tempMethod = method;
+
+		ParameterInfo[] tempInfo = tempMethod.GetParameters();
+
+		object[] parameters = new object[tempInfo.Length];
+
+		for (int i = 0; i < tempInfo.Length; i++)
+		{
+			if (FromByteArray(tempInfo[i].ParameterType, data, currentOffset, out size, ref tempObject))
+			{
+				parameters[i] = tempObject;
+			}
+			else
+			{
+				Debug.LogError("RPC function '" + name + "' was unable to convert parameter: " + (i + 1));
+				return null;
+			}
+
+			currentOffset += size;
+		}
+
+		return parameters;
 	}
 
 	protected bool FromByteArray(Type type, byte[] rawValue, int index, out int size, ref object data)
@@ -300,6 +345,19 @@ public class NetCode
 			size = 0;
 
 			return false;
+		}
+		//Object arrays mean nested data, the function needs to deal with that
+		else if (type == typeof(object[]))
+		{
+			size = rawValue.Length - index;
+
+			byte[] tempData = new byte[size];
+
+			Array.Copy(rawValue, index, tempData, 0, size);
+
+			data = (object)tempData;
+
+			return true;
 		}
 		//Server side only
 #if UNITY_WEBPLAYER

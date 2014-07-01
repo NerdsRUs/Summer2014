@@ -8,7 +8,7 @@ using UnityEditor;
 
 public class Timeline : MonoBehaviour
 {
-	//Note that the timeline can only go forward in time, so when drawing in the editor one needs to reset and redraw from 0
+	//note that the timeline can only go forward in time, so when drawing in the editor one needs to reset and redraw from 0
 	//this means we can't have constant update draws, and instead need to have a "Play from this point" button
 
 	const string EVENT_PREFIX = "TimelineEvent";

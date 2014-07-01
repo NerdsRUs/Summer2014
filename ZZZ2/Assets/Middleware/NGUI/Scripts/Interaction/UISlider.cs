@@ -11,7 +11,7 @@ using System.Collections.Generic;
 /// </summary>
 
 [ExecuteInEditMode]
-[AddComponentMenu("NGUI/Interaction/NGUI Slider")]
+[AddComponentMenu("NGUI/Interaction\nGUI Slider")]
 public class UISlider : UIProgressBar
 {
 	enum Direction

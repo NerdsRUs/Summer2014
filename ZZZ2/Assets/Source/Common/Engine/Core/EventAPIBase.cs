@@ -3,21 +3,109 @@ using System.Collections;
 using System.Reflection;
 using System;
 
-public class EventAPIBase 
+public class EventAPIBase : NetCode
 {
+	public NetworkView networkView;
+
 	protected EngineManager mCurrentInstance;
 	protected NetCode mNetCode;
+
+	NetcodeTerminal mOldTerminal;
 
 	public void Init(EngineManager instance)
 	{
 		mCurrentInstance = instance;
 
-		mNetCode = new NetCode();
-		mNetCode.Init("EventAPI", instance.GetComponent<NetworkView>());
+		Init(null, null, "", null);
+	}
+
+	public void MakeOffline()
+	{
+		if (mOldTerminal != null)
+		{
+			GameObject.Destroy(mOldTerminal);
+
+			mOldTerminal = null;
+		}
+
+		Init(null, null, "", null);
+	}
+
+	public void MakeClient()
+	{
+		if (mOldTerminal != null)
+		{
+			GameObject.Destroy(mOldTerminal);
+		}
+
+		mOldTerminal = networkView.gameObject.AddComponent<ClientTerminal>();
+		mOldTerminal.Init(mNetCode);
+
+		Init(this, mOldTerminal, "ClientRPC", networkView);
+	}
+
+	public void MakeServer()
+	{
+		if (mOldTerminal != null)
+		{
+			GameObject.Destroy(mOldTerminal);
+		}
+
+		mOldTerminal = networkView.gameObject.AddComponent<ServerTerminal>();
+		mOldTerminal.Init(mNetCode);
+
+		Init(this, mOldTerminal, "ServerRPC", networkView);
+	}
+
+	void NormalizeParameters(ref object[] parameters)
+	{
+		object[] newParameters;
+
+		for (int i = 0; i < parameters.Length; i++)
+		{
+			if (parameters[i].GetType() == typeof(object[]))
+			{
+				object[] nestedParameters = (object[])parameters[i];
+
+				NormalizeParameters(ref nestedParameters);
+
+				newParameters = new object[parameters.Length + nestedParameters.Length - 1];
+
+				for (int j = 0; j < newParameters.Length; j++)
+				{
+					if (j < i)
+					{
+						newParameters[j] = parameters[j];
+					}
+					else if (j >= i && j < i + nestedParameters.Length)
+					{
+						newParameters[j] = nestedParameters[j - i];
+					}
+					else
+					{
+						newParameters[j] = parameters[j - nestedParameters.Length];
+					}
+				}
+
+				parameters = newParameters;
+			}
+			else
+			{
+				if (Common.TypeInheritsFrom(parameters[i].GetType(), typeof(EngineObject)))
+				{
+					parameters[i] = ((EngineObject)parameters[i]).GetObjectID();
+				}
+			}
+		}
 	}
 
 	protected void DoObjectFunction(int objectID, string functionName, params object[] parameters)
 	{
+		for (int i = 0; i < parameters.Length; i++)
+		{
+			Debug.Log(i + " -> " + parameters[i]);
+		}
+
 		EngineObject callObject = mCurrentInstance.GetObject<EngineObject>(objectID);
 
 		if (callObject == null)
@@ -36,18 +124,16 @@ public class EventAPIBase
 
 		ParameterInfo[] tempInfo = tempMethod.GetParameters();
 
-		if (parameters.Length != tempInfo.Length)
+		//Network version sends data as a byte array, need to parse it based on the sub function
+		if (parameters[0].GetType() == typeof(byte[]))
 		{
-			Debug.LogError("Event object function parameter counts don't match: '" + functionName + "' " + objectID + " " + tempInfo.Length + " got " + parameters.Length);
-			return;
+			parameters = mNetCode.GetParameterListFromBytes(tempMethod, (byte[])parameters[0]);
 		}
 
-		for (int i = 0; i < tempInfo.Length; i++)
+		if (parameters.Length != tempInfo.Length)
 		{
-			if (Common.TypeInheritsFrom(tempInfo[i].ParameterType, typeof(EngineObject)) && parameters[i].GetType() == typeof(int))
-			{
-				parameters[i] = mCurrentInstance.GetObject<EngineObject>((int)parameters[i]);
-			}
+			Debug.LogError("Event object function parameter counts don't match: '" + functionName + "' " + objectID + " expected " + tempInfo.Length + " got " + parameters.Length);
+			return;
 		}
 
 		try
@@ -56,7 +142,14 @@ public class EventAPIBase
 		}
 		catch (Exception e)
 		{
-			Debug.LogError("Event object function had error: " + e.Message + "/n" + e.StackTrace);
+			if (e.InnerException != null)
+			{
+				Debug.LogError("Event object function had error: " + e.InnerException.Message + "/n" + e.InnerException.StackTrace);
+			}
+			else
+			{
+				Debug.LogError("Event object function had error: " + e.Message + "/n" + e.StackTrace);
+			}			
 		}
 	}
 
@@ -94,24 +187,22 @@ public class EventAPIBase
 
 		ParameterInfo[] tempInfo = tempMethod.GetParameters();
 
-		parameters = (object[])parameters[2];
-
-		if (parameters.Length != tempInfo.Length)
+		if (parameters.Length - 2 != tempInfo.Length)
 		{
-			return "Event object function parameter counts don't match: '" + functionName + "' " + objectID + " " + tempInfo.Length + " got " + parameters.Length;
+			return "Event object function parameter counts don't match: '" + functionName + "' " + objectID + " expected " + tempInfo.Length + " got " + (parameters.Length - 2);
 		}
 
 		string command = functionName + "(";
 
-		for (int i = 0; i < parameters.Length; i++)
+		for (int i = 2; i < parameters.Length; i++)
 		{
 			if (parameters[i].GetType() == typeof(object[]))
 			{
-				command += Convert.ChangeType(((object[])parameters[i])[0], tempInfo[i].ParameterType).ToString();
+				command += Convert.ChangeType(((object[])parameters[i])[0], tempInfo[i - 2].ParameterType).ToString();
 			}
 			else
 			{
-				command += Convert.ChangeType(parameters[i], tempInfo[i].ParameterType).ToString();
+				command += Convert.ChangeType(parameters[i], tempInfo[i - 2].ParameterType).ToString();
 			}
 
 			if (i + 1 < parameters.Length)
@@ -138,6 +229,7 @@ public class EventAPIBase
 
 	protected void NewEvent(string functionName, params object[] parameters)
 	{
+		NormalizeParameters(ref parameters);
 		mCurrentInstance.AddEvent(functionName, parameters);
 
 		//Send to all other clients
@@ -162,6 +254,7 @@ public class EventAPIBase
 
 	protected void NewEventLocalOnly(string functionName, params object[] parameters)
 	{
+		NormalizeParameters(ref parameters);
 		mCurrentInstance.AddEvent(functionName, parameters);		
 	}
 
@@ -180,8 +273,18 @@ public class EventAPIBase
 	protected void NewEventAllRemote(string functionName, params object[] parameters)
 	{
 		//Send to all other clients
-
 		NewEventRemote(0, functionName, parameters);
+
+		if (EngineManager.mLocalManagers.Count > 1)
+		{
+			for (int i = 0; i < EngineManager.mLocalManagers.Count; i++)
+			{
+				if (EngineManager.mLocalManagers[i] != mCurrentInstance)
+				{
+					EngineManager.mLocalManagers[i].GetEventAPI().NewEventLocalOnly(functionName, parameters);
+				}
+			}
+		}
 	}
 
 
@@ -199,7 +302,16 @@ public class EventAPIBase
 	protected void NewEventRemote(int remoteIdentifer, string functionName, params object[] parameters)
 	{
 		//Send event to client
+		NormalizeParameters(ref parameters);
 
-		Common.getClientManager().GetEventAPI().NewEvent(functionName, parameters);
-	}	
+		MakeRPC(RPCMode.Others, functionName, parameters);
+	}
+
+	void MakeRPC(RPCMode mode, params object[] parameters)
+	{
+		if (mOldTerminal != null)
+		{
+			DoRPC("NewEventLocalOnly", RPCMode.Others, parameters);
+		}
+	}
 }

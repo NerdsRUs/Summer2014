@@ -68,7 +68,7 @@ namespace ExpEvalTS2
 		{
 			//Clear the Previous Exp
 			_exp_parser.Clear();
-			//Now Parse the Exp
+			//now Parse the Exp
 			_exp_tree = _exp_parser.ParseExpression(_exp);
 			return true;
 		}

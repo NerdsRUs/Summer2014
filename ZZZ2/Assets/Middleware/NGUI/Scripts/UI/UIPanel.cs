@@ -15,7 +15,7 @@ using System.Collections.Generic;
 /// </summary>
 
 [ExecuteInEditMode]
-[AddComponentMenu("NGUI/UI/NGUI Panel")]
+[AddComponentMenu("NGUI/UI\nGUI Panel")]
 public class UIPanel : UIRect
 {
 	/// <summary>

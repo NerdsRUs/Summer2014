@@ -19,7 +19,7 @@ using System.Text;
 /// </summary>
 
 [ExecuteInEditMode]
-[AddComponentMenu("NGUI/UI/NGUI Font")]
+[AddComponentMenu("NGUI/UI\nGUI Font")]
 public class UIFont : MonoBehaviour
 {
 	[HideInInspector][SerializeField] Material mMat;

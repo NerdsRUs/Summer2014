@@ -3,23 +3,49 @@ using System.Collections;
 using System.Reflection;
 using System;
 
-public class NetworkClient : NewableMonoBehaviour
+public class NetworkClient : NetcodeSender
 {
-	protected override string GetHolder()
+	public int port = 4000;
+
+	override protected void Start()
 	{
-		return "NetworkClients";
+		base.Start();
+
+		BeginConnection();
+
+		Debug.Log("Start " + name);
 	}
 
-	static public Script NewScript(GameObject parent, EngineManager engineManager, string name = "")
+	void BeginConnection()
 	{
-		return NewObject<Script>(parent, engineManager, name);
+		Network.Connect("127.0.0.1", port);
 	}
 
-	public void Init(EngineManager EngineManager, string name)
+	void OnConnectedToServer()
 	{
-		if (name != "")
+		if (enabled)
 		{
-			gameObject.name = name;
+			Debug.Log("OnConnectedToServer");
+
+			mManager.MakeServer();
+		}
+	}
+
+	void OnDisconnectedFromServer()
+	{
+		if (enabled)
+		{
+			Debug.Log("OnDisconnectedFromServer");
+
+			mManager.MakeOffline();
+		}
+	}
+
+	void OnFailedToConnect()
+	{
+		if (enabled)
+		{
+			Debug.Log("OnFailedToConnect");
 		}
 	}
 }

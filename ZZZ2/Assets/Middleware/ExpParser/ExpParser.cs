@@ -82,7 +82,7 @@ namespace ExpEvalTS2
 			NodeStack = st1;
 
 		}
-		//Not Implemented 
+		//not Implemented 
 
 		public string  ReMakeExpression(ExpTreeNode Tree)
 		{
@@ -101,7 +101,7 @@ namespace ExpEvalTS2
 			{
 				ExpTreeNode TmpLeft = NodeStack.Pop();
 
-				//Now this needs to be Symbol with no Sub tree
+				//now this needs to be Symbol with no Sub tree
 				if(TmpLeft._ndType != ExpTreeNode.NodeType.Symbol)
 				{
 						
@@ -181,7 +181,7 @@ namespace ExpEvalTS2
 			{
 				//The errors that might come would be from stack 
 				//If that went wrong -- gone case -- What use rwould do
-				//No USer specific Errors from this funtion
+				//no USer specific Errors from this funtion
 				switch(current)
 				{
 					case Token.Literal:

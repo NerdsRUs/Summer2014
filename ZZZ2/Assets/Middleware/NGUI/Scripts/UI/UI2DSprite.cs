@@ -16,7 +16,7 @@ using System.Collections.Generic;
 /// </summary>
 
 [ExecuteInEditMode]
-[AddComponentMenu("NGUI/UI/NGUI Unity2D Sprite")]
+[AddComponentMenu("NGUI/UI\nGUI Unity2D Sprite")]
 public class UI2DSprite : UIWidget
 {
 	[HideInInspector][SerializeField] UnityEngine.Sprite mSprite;

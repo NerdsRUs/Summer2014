@@ -126,7 +126,7 @@ namespace ExpEvalTS2
 				}
 
 			}
-			//Now call for the subTrees
+			//now call for the subTrees
 			if(this._left !=null)
 				Left_retval =this._left.ValidateExpTree(); 
 			if(this._right !=null)

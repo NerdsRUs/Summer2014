@@ -13,7 +13,7 @@ using System;
 using Alignment = NGUIText.Alignment;
 
 [ExecuteInEditMode]
-[AddComponentMenu("NGUI/UI/NGUI Label")]
+[AddComponentMenu("NGUI/UI\nGUI Label")]
 public class UILabel : UIWidget
 {
 	public enum Effect

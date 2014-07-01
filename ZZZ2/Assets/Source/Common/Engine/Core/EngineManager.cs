@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(NetworkView))]
 public class EngineManager : EngineObject 
 {
 	static double UPDATE_TICK = 0.1f;
@@ -28,14 +27,12 @@ public class EngineManager : EngineObject
 	private bool useDebugger;
 	EventDebug mEventDebug;
 
+	static public List<EngineManager> mLocalManagers = new List<EngineManager>();
+
 	//Test stuff
-	[SerializeField]
-	private bool isServer;
 
 	void Start()
 	{
-		mIsServer = isServer;
-
 		Init();
 
 		//mCurrentInstance = this;
@@ -70,12 +67,14 @@ public class EngineManager : EngineObject
 			mInstance.AddEngineObject(this);
 
 			OnInit();
+
+			mLocalManagers.Add(this);
 		}
 	}
 
 	public override void OnInit()
 	{
-		mEventAPI = new EventAPI();
+		mEventAPI = GetComponentInChildren<EventAPI>();
 		mEventAPI.Init(this);
 
 		base.OnInit();
@@ -222,5 +221,26 @@ public class EngineManager : EngineObject
 	override public bool IsServer()
 	{
 		return mIsServer;
+	}
+
+	public void MakeServer()
+	{
+		mIsServer = true;
+
+		mEventAPI.MakeServer();
+	}
+
+	public void MakeClient()
+	{
+		mIsServer = false;
+
+		mEventAPI.MakeClient();
+	}
+
+	public void MakeOffline()
+	{
+		mIsServer = false;
+
+		mEventAPI.MakeOffline();
 	}
 }

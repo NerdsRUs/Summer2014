@@ -11,7 +11,7 @@ using System.Collections.Generic;
 /// </summary>
 
 [ExecuteInEditMode]
-[AddComponentMenu("NGUI/Interaction/NGUI Progress Bar")]
+[AddComponentMenu("NGUI/Interaction\nGUI Progress Bar")]
 public class UIProgressBar : UIWidgetContainer
 {
 	public enum FillDirection
