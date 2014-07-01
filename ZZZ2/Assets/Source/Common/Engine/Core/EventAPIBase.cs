@@ -307,7 +307,7 @@ public class EventAPIBase : NetCode
 				return;
 			}
 
-			tempObjects[2] = this.GetParameterListFromBytes(tempMethod, (byte[])tempObjects[2], 4);
+			tempObjects[2] = this.GetParameterListFromBytes(tempMethod, (byte[])tempObjects[2]);
 		}
 
 		/*Debug.Log("NewEventPacket: " + functionName + " " + data.Length);
