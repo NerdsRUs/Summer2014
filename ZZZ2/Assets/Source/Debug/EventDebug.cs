@@ -19,6 +19,8 @@ public class EventDebug : MonoBehaviour
 		tempObject.mStackTrace = Environment.StackTrace;
 		tempObject.mCommand = newEvent.GetCommandString();
 
+		Debug.Log(newEvent.GetTime().ToString("0.0") + " -> " + tempObject.mCommand);
+
 		tempObject.name = newEvent.GetName();
 
 		gameObject.transform.parent = transform;

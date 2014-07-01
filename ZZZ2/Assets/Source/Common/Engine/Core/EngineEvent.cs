@@ -6,7 +6,7 @@ using System;
 
 public class EngineEvent
 {
-	float mTime;
+	double mTime;
 	Vector3 mPosition;
 	string mFunctionName;
 	object[] mParameters;
@@ -91,7 +91,14 @@ public class EngineEvent
 		}
 		catch (Exception e)
 		{
-			Debug.LogError("Event(" + mFunctionName + ") had error: " + e.Message + "/n" + e.StackTrace);
+			if (e.InnerException != null)
+			{
+				Debug.LogError("Event(" + mFunctionName + ") had error: " + e.InnerException.Message + "/n" + e.InnerException.StackTrace);
+			}
+			else
+			{
+				Debug.LogError("Event(" + mFunctionName + ") had error: " + e.Message + "/n" + e.StackTrace);
+			}
 		}
 
 		mExecutingEvent = false;
@@ -148,5 +155,10 @@ public class EngineEvent
 	static public bool isExecutingEvent()
 	{
 		return mExecutingEvent;
+	}
+
+	public double GetTime()
+	{
+		return mTime;
 	}
 }

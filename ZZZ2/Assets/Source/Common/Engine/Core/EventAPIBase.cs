@@ -8,7 +8,6 @@ public class EventAPIBase : NetCode
 	public NetworkView networkView;
 
 	protected EngineManager mCurrentInstance;
-	protected NetCode mNetCode;
 
 	NetcodeTerminal mOldTerminal;
 
@@ -39,7 +38,7 @@ public class EventAPIBase : NetCode
 		}
 
 		mOldTerminal = networkView.gameObject.AddComponent<ClientTerminal>();
-		mOldTerminal.Init(mNetCode);
+		mOldTerminal.Init(this);
 
 		Init(this, mOldTerminal, "DynamicRPC", networkView);
 	}
@@ -52,7 +51,7 @@ public class EventAPIBase : NetCode
 		}
 
 		mOldTerminal = networkView.gameObject.AddComponent<ServerTerminal>();
-		mOldTerminal.Init(mNetCode);
+		mOldTerminal.Init(this);
 
 		Init(this, mOldTerminal, "DynamicRPC", networkView);
 	}
@@ -60,6 +59,11 @@ public class EventAPIBase : NetCode
 	void NormalizeParameters(ref object[] parameters)
 	{
 		object[] newParameters;
+
+		/*for (int i = 0; i < parameters.Length; i++)
+		{
+			Debug.Log(parameters[i]);
+		}*/
 
 		for (int i = 0; i < parameters.Length; i++)
 		{
@@ -101,11 +105,6 @@ public class EventAPIBase : NetCode
 
 	protected void DoObjectFunction(int objectID, string functionName, params object[] parameters)
 	{
-		for (int i = 0; i < parameters.Length; i++)
-		{
-			Debug.Log(i + " -> " + parameters[i]);
-		}
-
 		EngineObject callObject = mCurrentInstance.GetObject<EngineObject>(objectID);
 
 		if (callObject == null)
@@ -125,16 +124,24 @@ public class EventAPIBase : NetCode
 		ParameterInfo[] tempInfo = tempMethod.GetParameters();
 
 		//Network version sends data as a byte array, need to parse it based on the sub function
-		if (parameters[0].GetType() == typeof(byte[]))
+		/*if (parameters[0].GetType() == typeof(byte[]))
 		{
-			parameters = mNetCode.GetParameterListFromBytes(tempMethod, (byte[])parameters[0]);
-		}
+			Debug.Log(functionName + " -> data length: " + ((byte[])parameters[0]).Length);
+
+			parameters = this.GetParameterListFromBytes(tempMethod, (byte[])parameters[0], 4);
+		}*/
 
 		if (parameters.Length != tempInfo.Length)
 		{
 			Debug.LogError("Event object function parameter counts don't match: '" + functionName + "' " + objectID + " expected " + tempInfo.Length + " got " + parameters.Length);
 			return;
 		}
+
+		/*Debug.Log("DoObjectFunction: " + parameters.Length);
+		for (int i = 0; i < parameters.Length; i++)
+		{
+			Debug.Log(i + " -> " + parameters[i]);
+		}*/
 
 		try
 		{
@@ -169,7 +176,7 @@ public class EventAPIBase : NetCode
 		else
 		{
 			return "Event object function's call object ID is invalid: " + functionName + " " + parameters[0].GetType();
-		}
+		}		
 
 		EngineObject callObject = mCurrentInstance.GetObject<EngineObject>(objectID);
 
@@ -259,6 +266,61 @@ public class EventAPIBase : NetCode
 	}
 
 
+
+	protected void NewEventPacket(string functionName, params byte[] data)
+	{
+		//Network version sends data as a byte array, need to parse it based on the sub function
+		MethodInfo tempMethod = this.GetType().GetMethod(functionName, BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+		if (tempMethod == null)
+		{
+			Debug.LogError("Event object function does not exist: '" + functionName + "'");
+			return;
+		}
+
+		object[] tempObjects = this.GetParameterListFromBytes(tempMethod, data);
+
+		/*for (int i = 0; i < tempObjects.Length; i++)
+		{
+			Debug.LogError(i + ") " + tempObjects[i]);
+		}*/
+
+		if (functionName == "DoObjectFunction" && tempObjects.Length > 2 && tempObjects[2].GetType() == typeof(byte[]))
+		{
+			//Debug.Log(((byte[])tempObjects[2]).Length);
+
+			int objectID = (int)tempObjects[0];
+
+			EngineObject callObject = mCurrentInstance.GetObject<EngineObject>(objectID);
+
+			if (callObject == null)
+			{
+				Debug.LogError("NewEventPacket Event object function's call object does not exist: " + objectID);
+				return;
+			}
+
+			tempMethod = callObject.GetType().GetMethod((string)tempObjects[1], BindingFlags.FlattenHierarchy | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+			if (tempMethod == null)
+			{
+				Debug.LogError("NewEventPacket function does not exist: '" + (string)tempObjects[1] + "'");
+				return;
+			}
+
+			tempObjects[2] = this.GetParameterListFromBytes(tempMethod, (byte[])tempObjects[2], 4);
+		}
+
+		/*Debug.Log("NewEventPacket: " + functionName + " " + data.Length);
+		for (int i = 0; i < tempObjects.Length; i++)
+		{
+			Debug.Log(tempObjects[i]);
+		}*/
+
+		NormalizeParameters(ref tempObjects);
+		NewEventLocalOnly(functionName, tempObjects);
+	}
+
+
 	//Adds event to all clients
 	protected void NewObjectEventAllRemote(int objectID, string functionName, params object[] parameters)
 	{
@@ -307,11 +369,30 @@ public class EventAPIBase : NetCode
 		MakeRPC(RPCMode.Others, functionName, parameters);
 	}
 
-	void MakeRPC(RPCMode mode, params object[] parameters)
+	void MakeRPC(RPCMode mode, string functionName, params object[] parameters)
 	{
 		if (mOldTerminal != null)
 		{
-			DoRPC("NewEventLocalOnly", RPCMode.Others, parameters);
+			/*Debug.Log("NewEvent length: " + GetRPCBytes(functionName, parameters).Length);
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				Debug.Log(i + " -> " + parameters[i]);
+			}*/
+			//MethodInfo tempMethod = this.GetType().GetMethod(functionName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+			//parameters = GetParameterListFromBytes(tempMethod, GetRPCBytes(functionName, parameters));
+			/*for (int i = 0; i < parameters.Length; i++)
+			{
+				if (parameters[i].GetType() == typeof(byte[]))
+				{
+					Debug.Log((sizeof(float) * 3));
+					Debug.Log(i + " -> " + parameters[i] + " " + ((byte[])parameters[i]).Length);
+				}
+				else
+				{
+					Debug.Log(i + " -> " + parameters[i]);
+				}
+			}*/
+			DoRPC("NewEventPacket", RPCMode.Others, functionName, GetRPCBytes(functionName, parameters));
 		}
 	}
 }

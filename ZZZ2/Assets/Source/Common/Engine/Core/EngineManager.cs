@@ -44,6 +44,8 @@ public class EngineManager : EngineObject
 			DataManager.LoadData();
 		}
 
+		Application.runInBackground = true;
+
 		InitStartUpObjects();
 
 		if (useDebugger)

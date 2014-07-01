@@ -172,8 +172,8 @@ public class NetCode : MonoBehaviour
 			}
 		}
 
-		Debug.Log(objects.Length + " " + objects[1].GetType());
-		if (objects.Length == 2 && objects[1].GetType() == typeof(object[]))
+		//Debug.Log(objects.Length + " " + objects[1].GetType());
+		/*if (objects.Length == 2 && objects[1].GetType() == typeof(object[]))
 		{
 			object[] nestedArray = (object[])objects[1];
 			object[] newObjects = new object[nestedArray.Length + 1];
@@ -186,7 +186,7 @@ public class NetCode : MonoBehaviour
 			}
 
 			objects = newObjects;
-		}
+		}*/
 
 		if (!isSubFunction && objects.Length != tempInfo.Length)
 		{
@@ -196,9 +196,9 @@ public class NetCode : MonoBehaviour
 
 		List<byte[]> tempBytes = new List<byte[]>();
 
-		for (int i = 0; i < tempInfo.Length; i++)
+		for (int i = 0; i < objects.Length; i++)
 		{
-			if (tempInfo[i].ParameterType != objects[i].GetType() && tempInfo[i].ParameterType != typeof(object[]))
+			if (i < tempInfo.Length && tempInfo[i].ParameterType != objects[i].GetType() && tempInfo[i].ParameterType != typeof(object[]))
 			{
 				Debug.LogError("RPC function '" + RPCname + "' parameter " + (i + 1) + " is the wrong type. Expected " + tempInfo[i].ParameterType + " got " + objects[i].GetType());
 				return null;
@@ -213,6 +213,8 @@ public class NetCode : MonoBehaviour
 		{
 			totalSize += tempBytes[i].Length;
 		}
+
+		//Debug.Log("Total packet size: " + totalSize);
 
 		if (totalSize > 0)
 		{
@@ -260,6 +262,13 @@ public class NetCode : MonoBehaviour
 			return;
 		}
 
+		/*string test = "";
+		for (int j = 0; j < data.Length; j++)
+		{
+			test += data[j];
+		}
+		Debug.Log(test);*/
+
 		object[] parameters = GetParameterListFromBytes(tempMethod, data);
 
 		/*if (DEBUG)
@@ -275,14 +284,28 @@ public class NetCode : MonoBehaviour
 			}
 		}*/
 
+		/*for (int i = 0; i < parameters.Length; i++)
+		{
+			if (parameters[i].GetType() == typeof(byte[]))
+			{
+				string test2 = "";
+				for (int j = 0; j < parameters.Length; j++)
+				{
+					test2 += ((byte[])parameters[i])[j];
+				}
+
+				Debug.Log(test2);
+			}
+		}*/
+
 		tempMethod.Invoke(mCallObject, parameters);
 	}
 
-	public object[] GetParameterListFromBytes(MethodInfo method, byte[] data)
+	public object[] GetParameterListFromBytes(MethodInfo method, byte[] data, int startIndex = 0)
 	{
 		int size;
 		object tempObject = null;
-		int currentOffset = 0;
+		int currentOffset = startIndex;
 
 		MethodInfo tempMethod = method;
 
@@ -356,6 +379,8 @@ public class NetCode : MonoBehaviour
 			Array.Copy(rawValue, index, tempData, 0, size);
 
 			data = (object)tempData;
+
+			//Debug.Log("index: " + index + " -> " + size);
 
 			return true;
 		}
