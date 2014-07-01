@@ -5,6 +5,7 @@ using System;
 
 public class NetworkClient : NetcodeSender
 {
+	public string ip;
 	public int port = 4000;
 
 	override protected void Start()
@@ -18,7 +19,7 @@ public class NetworkClient : NetcodeSender
 
 	void BeginConnection()
 	{
-		Network.Connect("127.0.0.1", port);
+		Network.Connect(ip, port);
 	}
 
 	void OnConnectedToServer()
@@ -27,7 +28,7 @@ public class NetworkClient : NetcodeSender
 		{
 			Debug.Log("OnConnectedToServer");
 
-			mManager.MakeServer();
+			mManager.MakeClient();
 		}
 	}
 
