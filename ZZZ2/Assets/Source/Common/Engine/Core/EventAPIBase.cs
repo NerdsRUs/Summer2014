@@ -41,7 +41,7 @@ public class EventAPIBase : NetCode
 		mOldTerminal = networkView.gameObject.AddComponent<ClientTerminal>();
 		mOldTerminal.Init(mNetCode);
 
-		Init(this, mOldTerminal, "ServerRPC", networkView);
+		Init(this, mOldTerminal, "DynamicRPC", networkView);
 	}
 
 	public void MakeServer()
@@ -54,7 +54,7 @@ public class EventAPIBase : NetCode
 		mOldTerminal = networkView.gameObject.AddComponent<ServerTerminal>();
 		mOldTerminal.Init(mNetCode);
 
-		Init(this, mOldTerminal, "ClientRPC", networkView);
+		Init(this, mOldTerminal, "DynamicRPC", networkView);
 	}
 
 	void NormalizeParameters(ref object[] parameters)
