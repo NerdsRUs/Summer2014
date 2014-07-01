@@ -3,7 +3,7 @@ using System.Collections;
 
 public class SyncObject : EngineObject 
 {
-	const float DEFAULT_SYNC_RATE = 0.5f;
+	const float DEFAULT_SYNC_RATE = 1.0f;
 	const float FORCED_SYNC_RATE = 0.05f;
 
 	double mNextSyncTime = 0;

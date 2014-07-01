@@ -5,6 +5,9 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PhysicObject : SyncObject 
 {
+	const float MIN_SPEED = 0.1f;
+	const float MIN_ANGULAR_SPEED = 1.0f;
+
 	/*Vector3 mLastVelocity;
 	float mLastAngularVelocity;
 	float mLastInertia;
@@ -43,9 +46,9 @@ public class PhysicObject : SyncObject
 		}
 	}*/
 
-	/*void FixedUpdate()
+	void FixedUpdate()
 	{
-		if (mCancelCollision)
+		/*if (mCancelCollision)
 		{
 			rigidbody2D.velocity = mLastVelocity;
 			rigidbody2D.angularVelocity = mLastAngularVelocity;
@@ -56,8 +59,18 @@ public class PhysicObject : SyncObject
 
 		mLastVelocity = rigidbody2D.velocity;
 		mLastAngularVelocity = rigidbody2D.angularVelocity;
-		mLastInertia = rigidbody2D.inertia;
-	}*/
+		mLastInertia = rigidbody2D.inertia;*/
+
+		if (rigidbody2D.velocity.magnitude < MIN_SPEED)
+		{
+			rigidbody2D.velocity = Vector3.zero;
+		}
+
+		if (Mathf.Abs(rigidbody2D.angularVelocity) < MIN_ANGULAR_SPEED)
+		{
+			rigidbody2D.angularVelocity = 0;
+		}
+	}
 
 	protected override bool CheckIsAtRest()
 	{
