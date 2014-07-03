@@ -4,12 +4,17 @@ using System.Collections.Generic;
 
 public class EngineManager : EngineObject 
 {
-	public static double CLIENT_DELAY_TIME = 0.1f;
+	public static double CLIENT_DELAY_TIME = 0.35f;
 	static double UPDATE_TICK = 0.1f;
+
+	[SerializeField]
+	bool isGraphical;
 
 	Pool<EngineObject> mGameObjects = new Pool<EngineObject>();
 	List<EngineEvent> mCurrentEvents = new List<EngineEvent>();
 	List<EngineEvent> mPastEvents = new List<EngineEvent>();
+
+	EngineEvent mCurrentEvent;
 
 	//static EngineManager mCurrentInstance;
 
@@ -23,10 +28,15 @@ public class EngineManager : EngineObject
 	EventAPI mEventAPI;
 
 	bool mIsServer;
+	bool mIsGraphics;
 
 	[SerializeField]
 	private bool useDebugger;
 	EventDebug mEventDebug;
+
+	[SerializeField]
+	private EngineManager graphicalManager;
+	private EngineManager mSyncedClient;
 
 	static public List<EngineManager> mLocalManagers = new List<EngineManager>();
 
@@ -34,6 +44,8 @@ public class EngineManager : EngineObject
 
 	void Start()
 	{
+		mIsGraphics = isGraphical;
+
 		Init();
 
 		//mCurrentInstance = this;
@@ -58,6 +70,11 @@ public class EngineManager : EngineObject
 
 			mEventDebug = gameObject.AddComponent<EventDebug>();
 		}
+
+		if (graphicalManager != null)
+		{
+			graphicalManager.SetSyncedClient(this);
+		}
 	}
 
 	public void Init()
@@ -71,7 +88,10 @@ public class EngineManager : EngineObject
 
 			OnInit();
 
-			mLocalManagers.Add(this);
+			if (!IsGraphics())
+			{
+				mLocalManagers.Add(this);
+			}
 		}
 	}
 
@@ -122,14 +142,19 @@ public class EngineManager : EngineObject
 				mEventDebug.name = "EventDebug (" + mEventDebug.GetEventCount() + ")";
 			}
 
+			mCurrentEvent = mCurrentEvents[0];
+
 			mCurrentEvents[0].Execute();
+
+			mCurrentEvent = null;
+
 			mCurrentEvents.RemoveAt(0);
 		}
 	}
 
 	public double GetEngineTime()
 	{
-		if (!IsServer())
+		if (!IsServer() && IsGraphics())
 		{
 			return Time.time - CLIENT_DELAY_TIME;
 		}
@@ -185,6 +210,11 @@ public class EngineManager : EngineObject
 	public void MakeEvent(EngineEvent callEvent)
 	{
 		mCurrentEvents.Add(callEvent);
+
+		mCurrentEvents.Sort(delegate(EngineEvent a, EngineEvent b)
+							{
+								return (int)((a.GetTime() - b.GetTime()) * 1000);
+							});
 	}
 
 	override public EventAPI GetEventAPI()
@@ -231,6 +261,11 @@ public class EngineManager : EngineObject
 		return mIsServer;
 	}
 
+	override public bool IsGraphics()
+	{
+		return mIsGraphics;
+	}
+
 	public void MakeServer()
 	{
 		mIsServer = true;
@@ -250,5 +285,25 @@ public class EngineManager : EngineObject
 		mIsServer = false;
 
 		mEventAPI.MakeOffline();
+	}
+
+	public EngineManager GetGraphics()
+	{
+		return graphicalManager;
+	}
+
+	public EngineManager GetSyncedClient()
+	{
+		return mSyncedClient;
+	}
+
+	void SetSyncedClient(EngineManager manager)
+	{
+		mSyncedClient = manager;
+	}
+
+	public EngineEvent GetCurrentEvent()
+	{
+		return mCurrentEvent;
 	}
 }

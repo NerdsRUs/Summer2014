@@ -5,8 +5,13 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PhysicObject : SyncObject 
 {
+	const int GLOBAL_SYNC_RATE = 60;
+
 	const float MIN_SPEED = 0.1f;
 	const float MIN_ANGULAR_SPEED = 1.0f;
+	const float REPOSITION_TIME = 1.0f;
+
+	//public static int mNextSyncFrame = 0;
 
 	/*Vector3 mLastVelocity;
 	float mLastAngularVelocity;
@@ -18,20 +23,49 @@ public class PhysicObject : SyncObject
 	{
 		ForceUpdate();
 
+		/*if (IsServer())
+		{
+			Debug.Log(mInstance.GetEngineTime() + " -> OnCollisionEnter2D");
+		}*/
+
 		//CheckCollision();
 	}
 
-	/*void OnCollisionStay()
+	void OnCollisionStay2D()
 	{
-		CheckCollision();
-	}*/
+		ForceUpdate();
+
+		/*if (IsServer())
+		{
+			Debug.Log(mInstance.GetEngineTime() + " -> OnCollisionStay2D");
+		}*/
+
+		//CheckCollision();
+	}
 
 	void OnCollisionExit2D()
 	{
 		ForceUpdate();
 
+		/*if (IsServer())
+		{
+			Debug.Log(mInstance.GetEngineTime() + " -> OnCollisionStay2D");
+		}*/
+
 		//CheckCollision();
 	}
+
+	//Send sync packets all at the same time to keep things from glitching through other things
+	/*protected override void LateUpdate()
+	{
+ 		if (IsOnHost())
+		{
+			if (Time.frameCount >= mNextSyncFrame || mForceSync)
+			{
+				SyncData();
+			}
+		}
+	}*/
 
 	/*void CheckCollision()
 	{
@@ -84,19 +118,59 @@ public class PhysicObject : SyncObject
 
 	void DoUpdate(Vector3 position, Vector3 scale, Vector3 rotation, Vector3 velocity, float angularVelocity)
 	{
-		if (IsServer())
-		{
-			Debug.Log("Update position");
-		}
+		//if (!IsServer())
+		/*{
+			Debug.Log("GetLastPacketTime: " + GetLastPacketTime() + " mInstance.GetCurrentEvent().GetTime() " + mInstance.GetCurrentEvent().GetTime());
+		}*/
 
-		transform.localPosition = position;
-		transform.localScale = scale;
+		if (GetLastPacketTime() >= mInstance.GetCurrentEvent().GetTime())
+		{
+			return;
+		}
 
 		Quaternion tempRotation = transform.localRotation;
 		tempRotation.eulerAngles = rotation;
+
+		if (mIsOnHost)
+		{
+			if (IsServer())
+			{
+				return;
+			}
+
+			if ((position - transform.position).magnitude < velocity.magnitude * REPOSITION_TIME &&
+				Quaternion.Angle(tempRotation, transform.localRotation) < angularVelocity * REPOSITION_TIME)
+			{
+				return;
+			}
+		}
+
+		DidUpdate();
+
+		/*if ((position - transform.position).sqrMagnitude < REPOSITION_CUTOFF * REPOSITION_CUTOFF && 
+			Quaternion.Angle(tempRotation, transform.localRotation) < ROTATION_CUTOFF)
+		{
+			return;
+		}*/
+
+		transform.localPosition = position;
+		transform.localScale = scale;
+				
 		transform.localRotation = tempRotation;
 
 		rigidbody2D.velocity = velocity;
 		rigidbody2D.angularVelocity = angularVelocity;
 	}
+
+	/*public override void DidSyncData()
+	{
+		mNextSyncFrame = Time.frameCount + GLOBAL_SYNC_RATE;
+
+		base.DidSyncData();
+	}*/
+
+	/*override protected bool IsOnHost()
+	{
+		return IsServer() && !mIsOnHost;
+	}*/
 }

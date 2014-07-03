@@ -19,7 +19,7 @@ public class EventDebug : MonoBehaviour
 		tempObject.mStackTrace = Environment.StackTrace;
 		tempObject.mCommand = newEvent.GetCommandString();
 
-		Debug.Log(newEvent.GetTime().ToString("0.0") + " -> " + tempObject.mCommand);
+		//Debug.Log(newEvent.GetTime().ToString("0.00") + " -> " + tempObject.mCommand);
 
 		tempObject.name = newEvent.GetName();
 

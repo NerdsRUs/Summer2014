@@ -218,6 +218,7 @@
      <Compile Include="Assets\Middleware\TimelineEditor\Timeline.cs" />
      <Compile Include="Assets\Middleware\TimelineEditor\TimelineLayer.cs" />
      <Compile Include="Assets\Middleware\TimelineEditor\TweenTimeline.cs" />
+     <Compile Include="Assets\Source\Client\Objects\InterpolatedPhysicObject.cs" />
      <Compile Include="Assets\Source\Client\Script.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\EngineEvent.cs" />
      <Compile Include="Assets\Source\Common\Engine\Core\EngineManager.cs" />

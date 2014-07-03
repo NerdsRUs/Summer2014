@@ -5,13 +5,40 @@ public class SyncObject : EngineObject
 {
 	const float DEFAULT_SYNC_RATE = 1.0f;
 	const float FORCED_SYNC_RATE = 0.05f;
+	protected static float DEFAULT_INTERPOLATION_TIME = 0.1f;
 
 	double mNextSyncTime = 0;
 	double mLastSyncTime = 0;
 
 	bool mAtRest = true;
 	bool mWasAtRest = true;
-	bool mForceSync = true;
+	protected bool mForceSync = true;
+
+	protected bool mIsOnHost = false;	
+
+	protected double mLastUpdateTime = -Common.BIG_NUMBER;
+	protected double mLastPacketTime = -Common.BIG_NUMBER;
+
+	virtual public void DidUpdate()
+	{
+		mLastUpdateTime = mInstance.GetEngineTime();
+		mLastPacketTime = mInstance.GetCurrentEvent().GetTime();
+	}
+
+	protected float GetInterpolationAmount()
+	{
+		float timeSinceUpdate = (float)(mInstance.GetEngineTime() - mLastUpdateTime);
+
+		return Mathf.Clamp01(timeSinceUpdate / DEFAULT_INTERPOLATION_TIME);
+	}
+
+	void Start()
+	{
+		if (gameObject.tag == "LocalPlayer")
+		{
+			SetIsOnHost(true);
+		}
+	}
 
 	virtual protected float GetDefaultSyncRate()
 	{
@@ -51,7 +78,7 @@ public class SyncObject : EngineObject
 		}
 	}
 
-	public void DidSyncData()
+	virtual public void DidSyncData()
 	{
 		mLastSyncTime = GetCurrentTime();
 		mNextSyncTime = mLastSyncTime + GetDefaultSyncRate();
@@ -59,7 +86,7 @@ public class SyncObject : EngineObject
 		mForceSync = false;
 	}
 
-	void SyncData()
+	protected void SyncData()
 	{
 		mAtRest = CheckIsAtRest();
 
@@ -84,6 +111,21 @@ public class SyncObject : EngineObject
 
 	virtual protected bool IsOnHost()
 	{
-		return IsServer();
+		return IsServer();// || mIsOnHost;
+	}
+
+	public void SetIsOnHost(bool isOnHost)
+	{
+		mIsOnHost = isOnHost;
+	}
+
+	public double GetLastUpdateTime()
+	{
+		return mLastUpdateTime;
+	}
+
+	public double GetLastPacketTime()
+	{
+		return mLastPacketTime;
 	}
 }

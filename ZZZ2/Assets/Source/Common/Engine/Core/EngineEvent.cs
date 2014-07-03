@@ -50,7 +50,8 @@ public class EngineEvent
 		mTime = time;
 		mPosition = position;
 		mFunctionName = eventName;
-		mParameters = parameters;
+		mParameters = new object[parameters.Length];
+		Array.Copy(parameters, mParameters, parameters.Length);
 		mEngineManager = instance;
 	}
 
@@ -146,10 +147,10 @@ public class EngineEvent
 	{
 		if (mFunctionName == "DoObjectFunction")
 		{
-			return mTime.ToString("0.00") + ") " +  mParameters[0].ToString() + " -> " + mParameters[1].ToString();
+			return mEngineManager.GetEngineTime().ToString("0.00") + " -> " + mTime.ToString("0.00") + ") " +  mParameters[0].ToString() + " -> " + mParameters[1].ToString();
 		}
 
-		return mTime.ToString("0.00") + ") " + mFunctionName;
+		return mEngineManager.GetEngineTime().ToString("0.00") + " -> " + mTime.ToString("0.00") + ") " + mFunctionName;
 	}
 
 	static public bool isExecutingEvent()

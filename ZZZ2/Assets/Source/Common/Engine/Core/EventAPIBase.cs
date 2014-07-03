@@ -2,14 +2,43 @@
 using System.Collections;
 using System.Reflection;
 using System;
+using System.Collections.Generic;
 
 public class EventAPIBase : NetCode
 {
+	const float TEST_LAG = 0.3f;
+
 	public NetworkView networkView;
 
 	protected EngineManager mCurrentInstance;
 
 	NetcodeTerminal mOldTerminal;
+
+	List<LocalPacket> mLocalPackets = new List<LocalPacket>();
+
+	struct LocalPacket
+	{
+		public double mTime;
+		public string mFunctionName;
+		public object[] mParameters;
+		public EventAPI mEventAPI;
+	}
+
+	protected override void Update()
+	{
+		for (int i = 0; i < mLocalPackets.Count; i++)
+		{
+			if (mCurrentInstance.GetEngineTime() >= mLocalPackets[i].mTime + TEST_LAG / 2)
+			{
+				mLocalPackets[i].mEventAPI.NewEventLocalOnly(mLocalPackets[i].mTime, mLocalPackets[i].mFunctionName, mLocalPackets[i].mParameters);
+
+				mLocalPackets.RemoveAt(i);
+				i--;
+			}
+		}
+
+		base.Update();
+	}
 
 	public void Init(EngineManager instance)
 	{
@@ -56,7 +85,7 @@ public class EventAPIBase : NetCode
 		Init(this, mOldTerminal, "DynamicRPC", networkView);
 	}
 
-	void NormalizeParameters(ref object[] parameters)
+	public void NormalizeParameters(ref object[] parameters)
 	{
 		object[] newParameters;
 
@@ -109,7 +138,7 @@ public class EventAPIBase : NetCode
 
 		if (callObject == null)
 		{
-			Debug.LogError("Event object function's call object does not exist: " + objectID);
+			Debug.LogError("Event object function '" + functionName + "'s call object does not exist: " + objectID);
 			return;
 		}
 
@@ -149,13 +178,19 @@ public class EventAPIBase : NetCode
 		}
 		catch (Exception e)
 		{
+			Debug.Log("Parameters:");
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				Debug.Log("    " + parameters[i]);
+			}
+
 			if (e.InnerException != null)
 			{
-				Debug.LogError("Event object function had error: " + e.InnerException.Message + "/n" + e.InnerException.StackTrace);
+				Debug.LogError("Event object function '" + functionName + "' had error: " + e.InnerException.Message + "/n" + e.InnerException.StackTrace);
 			}
 			else
 			{
-				Debug.LogError("Event object function had error: " + e.Message + "/n" + e.StackTrace);
+				Debug.LogError("Event object function '" + functionName + "' had error: " + e.Message + "/n" + e.StackTrace);
 			}			
 		}
 	}
@@ -246,14 +281,14 @@ public class EventAPIBase : NetCode
 
 		//Send to all other clients
 
-		if (mCurrentInstance.IsServer())
+		//if (mCurrentInstance.IsServer())
 		{
 			NewEventAllRemote(functionName, parameters);
 		}
 	}
 
 
-	//Adds event to server only
+	//Adds event to self only
 	protected void NewObjectEventLocalOnly(int objectID, string functionName, params object[] parameters)
 	{
 		NewEventLocalOnly("DoObjectFunction", objectID, functionName, parameters);
@@ -272,7 +307,42 @@ public class EventAPIBase : NetCode
 	protected void NewEventLocalOnly(double time, string functionName, params object[] parameters)
 	{
 		NormalizeParameters(ref parameters);
-		mCurrentInstance.AddEvent(time, functionName, parameters);		
+		mCurrentInstance.AddEvent(time, functionName, parameters);
+	}
+
+
+	//Adds event to server only
+	protected void NewObjectEventServerOnly(int objectID, string functionName, params object[] parameters)
+	{
+		NewEventServerOnly("DoObjectFunction", objectID, functionName, parameters);
+	}
+
+	protected void NewObjectEventServerOnly(EngineObject objectID, string functionName, params object[] parameters)
+	{
+		NewEventServerOnly("DoObjectFunction", objectID, functionName, parameters);
+	}
+
+	protected void NewEventServerOnly(string functionName, params object[] parameters)
+	{
+		NewEventServerOnly(mCurrentInstance.GetEngineTime(), functionName, parameters);
+	}
+
+	protected void NewEventServerOnly(double time, string functionName, params object[] parameters)
+	{
+		if (mCurrentInstance.IsServer())
+		{
+			NewEventLocalOnly(time, functionName, parameters);
+		}
+		else
+		{
+			//Add in test lag
+			if (!mCurrentInstance.IsGraphics())
+			{
+				NewEventAllRemote(time + 0.3f, functionName, parameters);
+			}
+		}
+		//NormalizeParameters(ref parameters);
+		//mCurrentInstance.AddEvent(time, functionName, parameters);
 	}
 
 
@@ -326,7 +396,7 @@ public class EventAPIBase : NetCode
 			Debug.Log(tempObjects[i]);
 		}*/
 
-		NormalizeParameters(ref tempObjects);
+		//NormalizeParameters(ref tempObjects);
 		NewEventLocalOnly(time, functionName, tempObjects);
 	}
 
@@ -349,6 +419,11 @@ public class EventAPIBase : NetCode
 
 	protected void NewEventAllRemote(double time, string functionName, params object[] parameters)
 	{
+		if (mCurrentInstance.IsGraphics())
+		{
+			return;
+		}
+
 		//Send to all other clients
 		NewEventRemote(0, time, functionName, parameters);
 
@@ -356,9 +431,17 @@ public class EventAPIBase : NetCode
 		{
 			for (int i = 0; i < EngineManager.mLocalManagers.Count; i++)
 			{
-				if (EngineManager.mLocalManagers[i] != mCurrentInstance)
+				if (EngineManager.mLocalManagers[i] != mCurrentInstance && (mCurrentInstance.IsServer() || EngineManager.mLocalManagers[i].IsServer()))
 				{
-					EngineManager.mLocalManagers[i].GetEventAPI().NewEventLocalOnly(time, functionName, parameters);
+					LocalPacket newPacket = new LocalPacket();
+					newPacket.mTime = time;
+					newPacket.mFunctionName = functionName;
+					newPacket.mParameters = parameters;
+					newPacket.mEventAPI = EngineManager.mLocalManagers[i].GetEventAPI();
+
+					mLocalPackets.Add(newPacket);
+
+					//EngineManager.mLocalManagers[i].GetEventAPI().NewEventLocalOnly(time, functionName, parameters);
 				}
 			}
 		}
@@ -383,6 +466,11 @@ public class EventAPIBase : NetCode
 
 	protected void NewEventRemote(int remoteIdentifer, double time, string functionName, params object[] parameters)
 	{
+		if (mCurrentInstance.IsGraphics())
+		{
+			return;
+		}
+
 		//Send event to client
 		NormalizeParameters(ref parameters);
 

@@ -7,6 +7,8 @@ public class UserInput : MonoBehaviour
 	Vector2 mCurrentVelocity;
 	EngineManager mManager;
 
+	public GameObject mLocalPlayer;
+
 	void Start () 
 	{
 		UICamera.fallThrough = gameObject;
@@ -27,14 +29,14 @@ public class UserInput : MonoBehaviour
 		} 
 		else 
 		{
-			mManager.GetEventAPI().SetUserVelocity(mManager.GetObjectByTag<Pathing>("LocalPlayer"), movement * 10);
+			mManager.GetEventAPI().SetUserVelocity(mLocalPlayer.GetComponent<Pathing>(), movement * 10);
 
 			mCurrentVelocity = movement;
 		}
 
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
-			mManager.GetEventAPI().CloneObject(mManager.GetObjectByTag<Pathing>("LocalPlayer"));
+			mManager.GetEventAPI().CloneObject(mLocalPlayer.GetComponent<Pathing>());
 		}
 	}
 

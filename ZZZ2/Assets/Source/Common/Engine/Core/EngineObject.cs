@@ -226,6 +226,11 @@ public class EngineObject : MonoBehaviour
 		newEvent.Init(mInstance, functionName, time, transform.position, parameters);
 
 		mInstance.MakeEvent(newEvent);
+
+		/*if (mInstance.GetGraphics() != null)
+		{
+			mInstance.GetGraphics().AddEvent(time, functionName, parameters);
+		}*/
 	}
 
 	virtual public bool executeCommand(string script)
@@ -277,5 +282,10 @@ public class EngineObject : MonoBehaviour
 	virtual public bool IsServer()
 	{
 		return mInstance.IsServer();
+	}
+
+	virtual public bool IsGraphics()
+	{
+		return mInstance.IsGraphics();
 	}
 }

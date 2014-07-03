@@ -6,7 +6,17 @@ public class EventAPI : EventAPIBase
 	//Can use objectID(int), or the actual Class interchangably
 	public void SetUserVelocity(Pathing objectID, Vector3 newVelocity)
 	{
-		NewObjectEventLocalOnly(objectID, "SetUserVelocity", newVelocity);
+		if (mCurrentInstance.IsGraphics())
+		{
+			NewObjectEventLocalOnly(objectID, "SetUserVelocity", newVelocity);
+		}
+		else
+		{
+			NewObjectEventServerOnly(objectID, "SetUserVelocity", newVelocity);
+		}
+		//NewEventLocalOnly(mCurrentInstance.GetEngineTime() + EngineManager.CLIENT_DELAY_TIME, "DoObjectFunction", objectID, "SetUserVelocity", newVelocity);
+
+		//NewEventAllRemote(mCurrentInstance.GetEngineTime(), "DoObjectFunction", objectID, "UpdateUserVelocity", newVelocity, objectID.transform.localPosition);
 
 		//Use the above command to create events from functions defined in other objects (must be of type EngineObject) - the type will be detected at runtime
 		//Further, this function will automatically convert objectIDs to the object type required by the function (again, must be of type EngineObject to convert)
@@ -24,22 +34,40 @@ public class EventAPI : EventAPIBase
 
 	public void UpdateMoveVelocity(Pathing objectID, Vector3 newVelocity, Vector3 position)
 	{
-		if (newVelocity.sqrMagnitude == 0)
+		//double test = 0;
+		
+		/*if (!mCurrentInstance.IsServer())
 		{
-			NewEventAllRemote(mCurrentInstance.GetEngineTime() - EngineManager.CLIENT_DELAY_TIME, "DoObjectFunction", objectID, "UpdateUserVelocity", newVelocity, position);
+			test = EngineManager.CLIENT_DELAY_TIME;
+		}*/
+
+		/*if (newVelocity.sqrMagnitude == 0 && mCurrentInstance.IsServer())
+		{
+			NewEventAllRemote(mCurrentInstance.GetEngineTime() + test, "DoObjectFunction", objectID, "UpdateUserVelocity", newVelocity, position);
 		}
 		else
 		{
+			//NewEventAllRemote(mCurrentInstance.GetEngineTime() + test, "DoObjectFunction", objectID, "UpdateUserVelocity", newVelocity, position);
 			NewObjectEventAllRemote(objectID, "UpdateUserVelocity", newVelocity, position);
-		}
+		}*/
+
+		NewObjectEventAllRemote(objectID, "UpdateUserVelocity", newVelocity, position);
 	}	
 
 	public void UpdatePhysics(PhysicObject objectID, Vector3 position, Vector3 scale, Vector3 rotation, Vector3 velocity, float angularVelocity)
 	{
-		if (mCurrentInstance.IsServer())
+		//double test = 0;
+
+		/*if (!mCurrentInstance.IsServer())
 		{
+			test = EngineManager.CLIENT_DELAY_TIME;
+		}*/
+
+		//if (mCurrentInstance.IsServer())
+		//{
+			//NewEventAllRemote(mCurrentInstance.GetEngineTime() + test, "DoObjectFunction", objectID, "DoUpdate", position, scale, rotation, velocity, angularVelocity);
 			NewObjectEventAllRemote(objectID, "DoUpdate", position, scale, rotation, velocity, angularVelocity);
-		}
+		//}
 	}
 
 	//Test junk
