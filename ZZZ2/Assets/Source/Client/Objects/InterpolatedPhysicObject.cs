@@ -48,12 +48,12 @@ public class InterpolatedPhysicObject : MonoBehaviour
 				//transform.localScale = mSyncedObject.localScale;
 			}*/
 
-			if (mSyncedRigidbody)
+			/*if (mSyncedRigidbody)
 			{
 				rigidbody2D.velocity = Vector3.Lerp(rigidbody2D.velocity, mSyncedRigidbody.velocity, interpolation);
 				rigidbody2D.angularVelocity = Mathf.Lerp(rigidbody2D.angularVelocity, mSyncedRigidbody.angularVelocity, interpolation);
 				//rigidbody2D.angularVelocity = mSyncedPhysics.angularVelocity;
-			}
+			}*/
 		}
 	}
 

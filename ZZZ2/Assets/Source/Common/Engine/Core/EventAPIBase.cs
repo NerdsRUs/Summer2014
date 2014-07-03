@@ -419,10 +419,10 @@ public class EventAPIBase : NetCode
 
 	protected void NewEventAllRemote(double time, string functionName, params object[] parameters)
 	{
-		if (mCurrentInstance.IsGraphics())
+		/*if (mCurrentInstance.IsGraphics())
 		{
 			return;
-		}
+		}*/
 
 		//Send to all other clients
 		NewEventRemote(0, time, functionName, parameters);

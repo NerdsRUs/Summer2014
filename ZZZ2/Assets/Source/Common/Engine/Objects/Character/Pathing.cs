@@ -21,7 +21,7 @@ public class Pathing : SyncObject
 
 	override protected float GetForcedSyncRate()
 	{
-		return 0.05f;
+		return 0.1f;
 	}
 
 	public void SetUserVelocity(Vector3 newVelocity)
@@ -34,14 +34,19 @@ public class Pathing : SyncObject
 		DidUpdate();
 	}
 
-	public void UpdateUserVelocity(Vector3 newVelocity, Vector3 position)
+	public void UpdateUserVelocity(double time, Vector3 newVelocity, Vector3 position)
 	{
-		if (IsGraphics())
+		//Relay timing data to clients
+		if (IsServer())
+		{
+			mInstance.GetEventAPI().UpdateMoveVelocity(this, time, newVelocity, position);
+		}
+		/*if (IsGraphics())
 		{
 			DidUpdate();
 
 			return;
-		}
+		}*/
 
 		DidUpdate();
 
@@ -54,13 +59,15 @@ public class Pathing : SyncObject
 			Debug.Log("Update position");
 		}*/
 
-		if (mMoveVelocity.sqrMagnitude > 0 && mInstance.GetCurrentEvent() != null)
+		mMoveVelocity = newVelocity;
+
+		/*if (mMoveVelocity.sqrMagnitude > 0 && mInstance.GetCurrentEvent() != null)
 		{
 			double deltaTime = mInstance.GetEngineTime() - mInstance.GetCurrentEvent().GetTime();
 
 			transform.localPosition = (Vector2)position + mMoveVelocity * (float)deltaTime / 2;
 		}
-		else
+		else*/
 		{
 			transform.localPosition = position;
 		}
@@ -118,7 +125,7 @@ public class Pathing : SyncObject
 
 	override protected void DoSyncData()
 	{
-		GetEventAPI().UpdateMoveVelocity(this, mMoveVelocity, transform.localPosition);
+		GetEventAPI().UpdateMoveVelocity(this, mInstance.GetEngineTime(), mMoveVelocity, transform.localPosition);
 
 		PhysicObject[] tempObjects = gameObject.GetComponents<PhysicObject>();
 
@@ -141,8 +148,8 @@ public class Pathing : SyncObject
 		}
 	}
 
-	/*protected override bool IsOnHost()
+	protected override bool IsOnHost()
 	{
-		return mIsOnHost;
-	}*/
+		return mIsOnHost && IsGraphics() || IsServer();
+	}
 }

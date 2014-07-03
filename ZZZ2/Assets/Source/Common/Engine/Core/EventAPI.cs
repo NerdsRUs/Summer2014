@@ -10,10 +10,10 @@ public class EventAPI : EventAPIBase
 		{
 			NewObjectEventLocalOnly(objectID, "SetUserVelocity", newVelocity);
 		}
-		else
+		/*else
 		{
 			NewObjectEventServerOnly(objectID, "SetUserVelocity", newVelocity);
-		}
+		}*/
 		//NewEventLocalOnly(mCurrentInstance.GetEngineTime() + EngineManager.CLIENT_DELAY_TIME, "DoObjectFunction", objectID, "SetUserVelocity", newVelocity);
 
 		//NewEventAllRemote(mCurrentInstance.GetEngineTime(), "DoObjectFunction", objectID, "UpdateUserVelocity", newVelocity, objectID.transform.localPosition);
@@ -32,7 +32,7 @@ public class EventAPI : EventAPIBase
 		mCurrentInstance.GetObject<Pathing>(objectID).SetUserVelocity(newVelocity);
 	}*/
 
-	public void UpdateMoveVelocity(Pathing objectID, Vector3 newVelocity, Vector3 position)
+	public void UpdateMoveVelocity(Pathing objectID, double time, Vector3 newVelocity, Vector3 position)
 	{
 		//double test = 0;
 		
@@ -51,7 +51,7 @@ public class EventAPI : EventAPIBase
 			NewObjectEventAllRemote(objectID, "UpdateUserVelocity", newVelocity, position);
 		}*/
 
-		NewObjectEventAllRemote(objectID, "UpdateUserVelocity", newVelocity, position);
+		NewObjectEventAllRemote(objectID, "UpdateUserVelocity", time, newVelocity, position);
 	}	
 
 	public void UpdatePhysics(PhysicObject objectID, Vector3 position, Vector3 scale, Vector3 rotation, Vector3 velocity, float angularVelocity)
