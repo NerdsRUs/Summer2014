@@ -5,11 +5,20 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PhysicObject : SyncObject 
 {
+	const int INTERPOLATION_FRAMES = 2;
 	const int GLOBAL_SYNC_RATE = 60;
 
 	const float MIN_SPEED = 0.1f;
 	const float MIN_ANGULAR_SPEED = 1.0f;
 	const float REPOSITION_TIME = 1.0f;
+
+	Vector3 mPositionOffset;
+	float mRotationOffset;
+
+	int mFramesSinceUpdate = INTERPOLATION_FRAMES;
+
+	Vector2 mLastVelocity;
+	float mLastAngualrVelocity;
 
 	//public static int mNextSyncFrame = 0;
 
@@ -95,6 +104,29 @@ public class PhysicObject : SyncObject
 		mLastAngularVelocity = rigidbody2D.angularVelocity;
 		mLastInertia = rigidbody2D.inertia;*/
 
+		
+
+		/*if (mFramesSinceUpdate < INTERPOLATION_FRAMES)
+		{
+			Vector2 interpolationVelocity = Vector2.zero;
+			float interpolationAngularVelocity = 0;
+
+			mFramesSinceUpdate++;
+
+			interpolationVelocity = mPositionOffset / (float)INTERPOLATION_FRAMES / Time.fixedDeltaTime;
+			interpolationVelocity = mPositionOffset / (float)INTERPOLATION_FRAMES / Time.fixedDeltaTime;
+
+
+			Vector2 deltaVelocity = rigidbody2D.velocity - mLastVelocity;
+			rigidbody2D.velocity = deltaVelocity + interpolationVelocity;
+			mLastVelocity = rigidbody2D.velocity;
+
+			float deltaAngular = rigidbody2D.angularVelocity - mLastAngualrVelocity;
+			rigidbody2D.angularVelocity = deltaAngular + interpolationAngularVelocity;
+			mLastAngualrVelocity = rigidbody2D.angularVelocity;
+		}*/
+
+
 		if (rigidbody2D.velocity.magnitude < MIN_SPEED)
 		{
 			rigidbody2D.velocity = Vector3.zero;
@@ -108,25 +140,30 @@ public class PhysicObject : SyncObject
 
 	protected override bool CheckIsAtRest()
 	{
-		return rigidbody2D.velocity.sqrMagnitude == 0 && Mathf.Abs(rigidbody2D.angularVelocity) == 0;
+		return rigidbody2D.velocity.magnitude < MIN_SPEED && Mathf.Abs(rigidbody2D.angularVelocity) < MIN_ANGULAR_SPEED;
 	}
 
 	override protected void DoSyncData()
 	{
-		GetEventAPI().UpdatePhysics(this, transform.localPosition, transform.localScale, transform.localRotation.eulerAngles, rigidbody2D.velocity, rigidbody2D.angularVelocity);
+		GetEventAPI().UpdatePhysics(this, transform.localPosition, transform.localRotation.eulerAngles, rigidbody2D.velocity, rigidbody2D.angularVelocity);
 	}
 
-	void DoUpdate(Vector3 position, Vector3 scale, Vector3 rotation, Vector3 velocity, float angularVelocity)
+	void DoUpdate(Vector3 position, Vector3 rotation, Vector3 velocity, float angularVelocity)
 	{
+		if (IsGraphics() && mIsOnHost)
+		{
+			return;
+		}
+
 		//if (!IsServer())
 		/*{
 			Debug.Log("GetLastPacketTime: " + GetLastPacketTime() + " mInstance.GetCurrentEvent().GetTime() " + mInstance.GetCurrentEvent().GetTime());
 		}*/
 
-		if (GetLastPacketTime() >= mInstance.GetCurrentEvent().GetTime())
+		/*if (GetLastPacketTime() >= mInstance.GetCurrentEvent().GetTime())
 		{
 			return;
-		}
+		}*/
 
 		Quaternion tempRotation = transform.localRotation;
 		tempRotation.eulerAngles = rotation;
@@ -138,11 +175,11 @@ public class PhysicObject : SyncObject
 				return;
 			}
 
-			if ((position - transform.position).magnitude < velocity.magnitude * REPOSITION_TIME &&
+			/*if ((position - transform.position).magnitude < velocity.magnitude * REPOSITION_TIME &&
 				Quaternion.Angle(tempRotation, transform.localRotation) < angularVelocity * REPOSITION_TIME)
 			{
 				return;
-			}
+			}*/
 		}
 
 		DidUpdate();
@@ -153,13 +190,21 @@ public class PhysicObject : SyncObject
 			return;
 		}*/
 
+		mPositionOffset = position - transform.localPosition;
+		mRotationOffset = Quaternion.Angle(tempRotation, transform.localRotation);
+
 		transform.localPosition = position;
-		transform.localScale = scale;
-				
 		transform.localRotation = tempRotation;
 
 		rigidbody2D.velocity = velocity;
 		rigidbody2D.angularVelocity = angularVelocity;
+	}
+
+	public override void DidUpdate()
+	{
+		base.DidUpdate();
+
+		mFramesSinceUpdate = 0;
 	}
 
 	/*public override void DidSyncData()

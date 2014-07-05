@@ -226,8 +226,11 @@ public class EngineObject : MonoBehaviour
 		newEvent.Init(mInstance, functionName, time, transform.position, parameters);
 
 		mInstance.MakeEvent(newEvent);
-
-		/*if (mInstance.GetGraphics() != null)
+		/*if (mInstance.GetGraphics() != null && functionName == "DoObjectFunction")
+		{
+			Debug.Log(parameters[1]);
+		}
+		if (mInstance.GetGraphics() != null && functionName != "DoObjectFunction" || (parameters[1] != "UpdateUserVelocity" && parameters[1] != "DoUpdate"))
 		{
 			mInstance.GetGraphics().AddEvent(time, functionName, parameters);
 		}*/

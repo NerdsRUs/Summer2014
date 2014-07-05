@@ -154,10 +154,10 @@ public class EngineManager : EngineObject
 
 	public double GetEngineTime()
 	{
-		if (!IsServer() && IsGraphics())
+		/*if (!IsServer() && IsGraphics())
 		{
 			return Time.time - CLIENT_DELAY_TIME;
-		}
+		}*/
 
 		return Time.time;
 	}

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public class EventAPIBase : NetCode
 {
-	const float TEST_LAG = 0.3f;
+	const float TEST_LAG = 0.05f;
 
 	public NetworkView networkView;
 
@@ -336,7 +336,7 @@ public class EventAPIBase : NetCode
 		else
 		{
 			//Add in test lag
-			if (!mCurrentInstance.IsGraphics())
+			//if (!mCurrentInstance.IsGraphics())
 			{
 				NewEventAllRemote(time + 0.3f, functionName, parameters);
 			}

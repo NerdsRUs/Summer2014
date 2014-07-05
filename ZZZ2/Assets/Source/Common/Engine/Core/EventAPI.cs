@@ -54,7 +54,7 @@ public class EventAPI : EventAPIBase
 		NewObjectEventAllRemote(objectID, "UpdateUserVelocity", time, newVelocity, position);
 	}	
 
-	public void UpdatePhysics(PhysicObject objectID, Vector3 position, Vector3 scale, Vector3 rotation, Vector3 velocity, float angularVelocity)
+	public void UpdatePhysics(PhysicObject objectID, Vector3 position, Vector3 rotation, Vector3 velocity, float angularVelocity)
 	{
 		//double test = 0;
 
@@ -66,7 +66,7 @@ public class EventAPI : EventAPIBase
 		//if (mCurrentInstance.IsServer())
 		//{
 			//NewEventAllRemote(mCurrentInstance.GetEngineTime() + test, "DoObjectFunction", objectID, "DoUpdate", position, scale, rotation, velocity, angularVelocity);
-			NewObjectEventAllRemote(objectID, "DoUpdate", position, scale, rotation, velocity, angularVelocity);
+			NewObjectEventAllRemote(objectID, "DoUpdate", position, rotation, velocity, angularVelocity);
 		//}
 	}
 
